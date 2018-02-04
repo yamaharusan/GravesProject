@@ -56,11 +56,15 @@ public class gui_debug_3dLine : MonoBehaviour {
 
 		LineRenderer line = lineList[Count].GetComponent<LineRenderer>();
 		line.useWorldSpace = false;
-		line.SetWidth(width,width);
-		line.SetVertexCount(2);
+
+        line.startWidth = width;
+        line.endWidth = width;
+        line.positionCount = 2;
+        line.startColor = col;
+        line.endColor = col;
+
 		line.SetPosition(0,a);
 		line.SetPosition(1,b);
-		line.SetColors(col,col);
 
 		Count++;
 
@@ -75,11 +79,15 @@ public class gui_debug_3dLine : MonoBehaviour {
 		
 		LineRenderer line = lineList[Count].GetComponent<LineRenderer>();
 		line.useWorldSpace = false;
-		line.SetWidth(width,width);
-		line.SetVertexCount(2);
-		line.SetPosition(0,a.transform.position);
+
+        line.startWidth = width;
+        line.endWidth = width;
+        line.positionCount = 2;
+        line.startColor = col;
+        line.endColor = col;
+
+        line.SetPosition(0,a.transform.position);
 		line.SetPosition(1,a.transform.position + Vector3.up*b);
-		line.SetColors(col,col);
 
 		return line;
 	}
@@ -92,11 +100,15 @@ public class gui_debug_3dLine : MonoBehaviour {
 
 		LineRenderer line = lineList[Count].GetComponent<LineRenderer>();
 		line.useWorldSpace = false;
-		line.SetWidth(width,width);
-		line.SetVertexCount(2);
-		line.SetPosition(0,a);
+
+        line.startWidth = width;
+        line.endWidth = width;
+        line.positionCount = 2;
+        line.startColor = col;
+        line.endColor = col;
+
+        line.SetPosition(0,a);
 		line.SetPosition(1,a + Vector3.up*b);
-		line.SetColors(col,col);
 
 		Count++;
 
@@ -110,11 +122,15 @@ public class gui_debug_3dLine : MonoBehaviour {
 
 		LineRenderer line = lineList[Count].GetComponent<LineRenderer>();
 		line.useWorldSpace = false;
-		line.SetWidth(width,width);
-		line.SetVertexCount(2);
-		line.SetPosition(0,a.transform.position + Vector3.up*c);
+
+        line.startWidth = width;
+        line.endWidth = width;
+        line.positionCount = 2;
+        line.startColor = col;
+        line.endColor = col;
+
+        line.SetPosition(0,a.transform.position + Vector3.up*c);
 		line.SetPosition(1,b.transform.position + Vector3.up*c);
-		line.SetColors(col,col);
 
 		Count++;
 

@@ -24,8 +24,15 @@ namespace Graves
         //@Public
         /**rigidbody**/
         [System.NonSerialized]
-        public Rigidbody2D myRigidbody;
+        public Rigidbody2D MyRigidbody;
 
+        /**boxcollider**/
+        public BoxCollider2D MyBoxCollider;
+
+        /**SpriteRenderer**/
+        public SpriteRenderer MySpriteRenderer;
+
+        /**parts size**/
         [System.NonSerialized]
         public Vector2 Size = Vector2.one;
 
@@ -90,9 +97,24 @@ namespace Graves
         private void Initialization()
         {
             //GetRigidBody
-            myRigidbody = GetComponent<Rigidbody2D>();
+            MyRigidbody = GetComponent<Rigidbody2D>();
 
-            
+            //Colllider
+            MyBoxCollider = GetComponent<BoxCollider2D>();
+
+            //Sprite
+            MySpriteRenderer = GetComponent<SpriteRenderer>();
+
+            //SetSize
+            if (MyBoxCollider)
+            {
+                Size = MyBoxCollider.size;
+
+                if (MySpriteRenderer)
+                {
+                    MySpriteRenderer.size = Size;
+                }
+            }
 
             //もし子にパーツが存在したら親子登録
             foreach ( Transform t in transform )
