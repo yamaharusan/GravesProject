@@ -11,14 +11,23 @@ using UnityEngine;
     ・子の無いオブジェクトはTargetJointをつける事ができる。
 
 ・命名規則
-    ・
+    ・UpperCamel
 
 **/
+
 namespace Graves
 {
     public class PartsBase : MonoBehaviour
     {
-        #region PublicMember
+        #region Members
+
+        //@Public
+        /**rigidbody**/
+        [System.NonSerialized]
+        public Rigidbody2D myRigidbody;
+
+        [System.NonSerialized]
+        public Vector2 Size = Vector2.one;
 
         /**キャラクター管理クラス**/
         [System.NonSerialized]
@@ -32,7 +41,6 @@ namespace Graves
         [System.NonSerialized]
         public List<PartsBase> ChildParts = new List<PartsBase>();
 
-        /**自分の役割　手や足など**/
         public enum PartCategory
         {
             Core,
@@ -41,37 +49,60 @@ namespace Graves
             Leg,
             None = -1
         }
+
+        /**自分の役割　手や足など**/
         public PartCategory MyPartCategory = PartCategory.None;
 
         /**HitPoint**/
         public int HitPoint = 0;
 
-        #endregion
-
-        #region PrivateMember
-
+        //@Private
 
 
         #endregion
 
-        #region Main
+        #region Methods
 
-        // Use this for initialization
-        private void Start()
+        //@Protected
+
+        protected virtual void Start()
         {
             Initialization();
         }
 
-        // Update is called once per frame
-        private void Update()
+        protected virtual void Update()
         {
 
         }
 
-        //初期設定
+        //@Public
+
+        /**この関数を呼んだ相手を親に登録**/
+        public void DockingParts(PartsBase parent)
+        {
+            parent.ChildParts.Add(this);
+            RootParts = parent;
+        }
+
+        //@Private
+
+        /**初期設定**/
         private void Initialization()
         {
+            //GetRigidBody
+            myRigidbody = GetComponent<Rigidbody2D>();
 
+            
+
+            //もし子にパーツが存在したら親子登録
+            foreach ( Transform t in transform )
+            {
+                PartsBase p = t.gameObject.GetComponent<PartsBase>();
+                if (p)
+                {
+                    p.DockingParts(this);
+                }
+            }
         }
 
         #endregion

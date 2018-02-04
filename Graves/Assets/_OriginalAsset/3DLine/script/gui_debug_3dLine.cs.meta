@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f4f0403934e90f344ba83086a67a6041
+timeCreated: 1502174155
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - Line3D: {fileID: 134494, guid: c39883b91cf90ef4790ed28a41197415, type: 2}
+  - empty: {fileID: 179696, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+  executionOrder: -1100
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
