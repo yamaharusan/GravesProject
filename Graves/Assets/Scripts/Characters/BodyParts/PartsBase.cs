@@ -32,6 +32,9 @@ namespace Graves
         /**SpriteRenderer**/
         public SpriteRenderer MySpriteRenderer;
 
+        /****/
+        public TargetJoint2D MyTargetJoint = null;
+
         /**parts size**/
         [System.NonSerialized]
         public Vector2 Size = Vector2.one;
@@ -79,7 +82,16 @@ namespace Graves
 
         protected virtual void Update()
         {
-
+            if (MyPartCategory == PartCategory.Leg)
+            {
+                if (MyTargetJoint)
+                {
+                    if (MyRigidbody)
+                    {
+                        MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.005f );
+                    }
+                }
+            }
         }
 
         //@Public
@@ -115,6 +127,9 @@ namespace Graves
                     MySpriteRenderer.size = Size;
                 }
             }
+
+            //TJoint
+            MyTargetJoint = GetComponent<TargetJoint2D>();
 
             //もし子にパーツが存在したら親子登録
             foreach ( Transform t in transform )
