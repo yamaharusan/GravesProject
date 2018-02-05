@@ -90,6 +90,20 @@ namespace Graves
                     {
                         MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.005f );
                     }
+
+                    float myTGdestance = 1f;
+
+                    Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
+                    Vector2 tjv = (MyTargetJoint.target - mtp);
+
+                    float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
+
+                    MyTargetJoint.target += Vector2.up * tjl * Time.deltaTime;
+                    //MyTargetJoint.target = mtp - Vector2.up * myTGdestance;
+
+                    gui_debug_3dLine.main.setWidth(0.01f);
+                    gui_debug_3dLine.main.draw( transform.position + transform.TransformVector(MyTargetJoint.anchor), MyTargetJoint.target);
+
                 }
             }
         }

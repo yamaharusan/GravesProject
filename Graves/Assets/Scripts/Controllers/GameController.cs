@@ -4,7 +4,7 @@ using UnityEngine;
 
 /**
 Instantiateは重いので予め呼び出して使いまわす。
-
+つくらない方がいいもっと、細かく分離したほうがいい(スコア・シーン遷移など)
 **/
 
 namespace Graves

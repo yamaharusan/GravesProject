@@ -781,7 +781,7 @@ MonoBehaviour:
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
   MyTargetJoint: {fileID: 0}
-  MyPartCategory: 3
+  MyPartCategory: -1
   HitPoint: 0
 --- !u!233 &308758849
 HingeJoint2D:
@@ -1500,7 +1500,7 @@ MonoBehaviour:
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
   MyTargetJoint: {fileID: 0}
-  MyPartCategory: 3
+  MyPartCategory: -1
   HitPoint: 0
 --- !u!61 &1607334071
 BoxCollider2D:
@@ -2006,7 +2006,7 @@ MonoBehaviour:
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
   MyTargetJoint: {fileID: 0}
-  MyPartCategory: 3
+  MyPartCategory: -1
   HitPoint: 0
 --- !u!61 &1849597036
 BoxCollider2D:
@@ -2108,3 +2108,45 @@ TargetJoint2D:
   m_MaxForce: 10000
   m_DampingRatio: 1
   m_Frequency: 5
+--- !u!1001 &1923749726
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 463652, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 25e155bb380af894ca105abd79c67494, type: 2}
+  m_IsPrefabParent: 0
