@@ -66,6 +66,12 @@ namespace Graves
         /**HitPoint**/
         public int HitPoint = 0;
 
+        /**t pos**/
+        [System.NonSerialized]
+        public Vector2 MyTargetPosition = Vector2.zero;
+        public static int LegCount = 0;
+        public int MyLegCount = 0;
+
         //@Private
 
 
@@ -91,15 +97,16 @@ namespace Graves
                         MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.005f );
                     }
 
-                    float myTGdestance = 1f;
-
                     Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
                     Vector2 tjv = (MyTargetJoint.target - mtp);
 
                     float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
 
-                    MyTargetJoint.target += Vector2.up * tjl * Time.deltaTime;
-                    //MyTargetJoint.target = mtp - Vector2.up * myTGdestance;
+                    float time = (Time.time * 5f) + (Mathf.PI * MyLegCount);
+
+                    //MyTargetPosition += Vector2.up * tjl * Time.deltaTime;
+
+                    MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time)*0.5f, Mathf.Sin(time)) * 0.2f; ;
 
                     gui_debug_3dLine.main.setWidth(0.01f);
                     gui_debug_3dLine.main.draw( transform.position + transform.TransformVector(MyTargetJoint.anchor), MyTargetJoint.target);
@@ -145,6 +152,16 @@ namespace Graves
             //TJoint
             MyTargetJoint = GetComponent<TargetJoint2D>();
 
+            if (MyTargetJoint)
+            {
+                MyTargetPosition = MyTargetJoint.target;
+                if (MyPartCategory == PartCategory.Leg)
+                {
+                    MyLegCount = LegCount;
+                    LegCount++;
+                }
+            }
+            
             //もし子にパーツが存在したら親子登録
             foreach ( Transform t in transform )
             {
