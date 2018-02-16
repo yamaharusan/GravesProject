@@ -32,9 +32,6 @@ namespace Graves
         /**SpriteRenderer**/
         public SpriteRenderer MySpriteRenderer;
 
-        /****/
-        public TargetJoint2D MyTargetJoint = null;
-
         /**parts size**/
         [System.NonSerialized]
         public Vector2 Size = Vector2.one;
@@ -66,14 +63,7 @@ namespace Graves
         /**HitPoint**/
         public int HitPoint = 0;
 
-        /**t pos**/
-        [System.NonSerialized]
-        public Vector2 MyTargetPosition = Vector2.zero;
-        public static int LegCount = 0;
-        public int MyLegCount = 0;
-
         //@Private
-
 
         #endregion
 
@@ -88,31 +78,7 @@ namespace Graves
 
         protected virtual void Update()
         {
-            if (MyPartCategory == PartCategory.Leg)
-            {
-                if (MyTargetJoint)
-                {
-                    if (MyRigidbody)
-                    {
-                        MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.005f );
-                    }
 
-                    Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
-                    Vector2 tjv = (MyTargetJoint.target - mtp);
-
-                    float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
-
-                    float time = (Time.time * 5f) + (Mathf.PI * MyLegCount);
-
-                    //MyTargetPosition += Vector2.up * tjl * Time.deltaTime;
-
-                    MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time)*0.5f, Mathf.Sin(time)) * 0.2f; ;
-
-                    gui_debug_3dLine.main.setWidth(0.01f);
-                    gui_debug_3dLine.main.draw( transform.position + transform.TransformVector(MyTargetJoint.anchor), MyTargetJoint.target);
-
-                }
-            }
         }
 
         //@Public
@@ -127,7 +93,7 @@ namespace Graves
         //@Private
 
         /**初期設定**/
-        private void Initialization()
+        protected virtual void Initialization()
         {
             //GetRigidBody
             MyRigidbody = GetComponent<Rigidbody2D>();
@@ -146,19 +112,6 @@ namespace Graves
                 if (MySpriteRenderer)
                 {
                     MySpriteRenderer.size = Size;
-                }
-            }
-
-            //TJoint
-            MyTargetJoint = GetComponent<TargetJoint2D>();
-
-            if (MyTargetJoint)
-            {
-                MyTargetPosition = MyTargetJoint.target;
-                if (MyPartCategory == PartCategory.Leg)
-                {
-                    MyLegCount = LegCount;
-                    LegCount++;
                 }
             }
             

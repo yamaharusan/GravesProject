@@ -171,14 +171,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 151334471}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8189e2fd285886f4d8bd50eabda1dd00, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
-  MyPartCategory: 3
+  MyPartCategory: -1
   HitPoint: 0
+  MyTargetJoint: {fileID: 0}
 --- !u!61 &151334475
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -385,7 +385,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 0.8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -407,7 +407,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 248954304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -641,7 +641,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: -1
   HitPoint: 0
 --- !u!1 &308758842
@@ -780,7 +779,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: -1
   HitPoint: 0
 --- !u!233 &308758849
@@ -935,8 +933,8 @@ GameObject:
   - component: {fileID: 802234770}
   - component: {fileID: 802234766}
   - component: {fileID: 802234769}
-  - component: {fileID: 802234768}
   - component: {fileID: 802234767}
+  - component: {fileID: 802234768}
   m_Layer: 8
   m_Name: body (2)
   m_TagString: Untagged
@@ -990,14 +988,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 802234765}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8189e2fd285886f4d8bd50eabda1dd00, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
-  MyPartCategory: 3
+  MyPartCategory: -1
   HitPoint: 0
+  MyTargetJoint: {fileID: 0}
 --- !u!61 &802234769
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1207,14 +1205,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1017549555}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8189e2fd285886f4d8bd50eabda1dd00, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: 3
   HitPoint: 0
+  MyTargetJoint: {fileID: 0}
 --- !u!61 &1017549559
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1380,7 +1378,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: 3
   HitPoint: 0
 --- !u!61 &1334793027
@@ -1499,7 +1496,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: -1
   HitPoint: 0
 --- !u!61 &1607334071
@@ -1698,7 +1694,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: 3
   HitPoint: 0
 --- !u!61 &1756399000
@@ -1866,7 +1861,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: 3
   HitPoint: 0
 --- !u!61 &1779944117
@@ -2000,14 +1994,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1849597033}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8189e2fd285886f4d8bd50eabda1dd00, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   MyBoxCollider: {fileID: 0}
   MySpriteRenderer: {fileID: 0}
-  MyTargetJoint: {fileID: 0}
   MyPartCategory: -1
   HitPoint: 0
+  MyTargetJoint: {fileID: 0}
 --- !u!61 &1849597036
 BoxCollider2D:
   m_ObjectHideFlags: 0
