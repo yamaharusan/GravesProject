@@ -7,12 +7,7 @@ namespace Graves
     {
         public static int LegCount = 0;
 
-        /****/
-        public TargetJoint2D MyTargetJoint = null;
-
         /**t pos**/
-        [System.NonSerialized]
-        public Vector2 MyTargetPosition = Vector2.zero;
         [System.NonSerialized]
         public int MyLegCount = 0;
 
@@ -39,7 +34,7 @@ namespace Graves
                     Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
                     Vector2 tjv = (MyTargetJoint.target - mtp);
 
-                    float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
+                    //float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
 
                     int legs = 3;
 
@@ -47,9 +42,9 @@ namespace Graves
 
                     //MyTargetPosition += Vector2.up * tjl * Time.deltaTime;
 
-                    MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time) * 0.5f, Mathf.Sin(time)) * 0.2f; ;
+                    MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time) * 0.8f, Mathf.Sin(time)) * 0.2f; ;
 
-                    gui_debug_3dLine.main.setWidth(0.01f);
+                    gui_debug_3dLine.main.setWidth(0.003f);
                     gui_debug_3dLine.main.draw(transform.position + transform.TransformVector(MyTargetJoint.anchor), MyTargetJoint.target);
 
                 }
@@ -63,12 +58,8 @@ namespace Graves
 
             MyPartCategory = PartCategory.Leg;
 
-            //TJoint
-            MyTargetJoint = GetComponent<TargetJoint2D>();
-
             if (MyTargetJoint)
             {
-                MyTargetPosition = MyTargetJoint.target;
                 if (MyPartCategory == PartCategory.Leg)
                 {
                     MyLegCount = LegCount;

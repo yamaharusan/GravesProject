@@ -48,6 +48,12 @@ namespace Graves
         [System.NonSerialized]
         public List<PartsBase> ChildParts = new List<PartsBase>();
 
+        /****/
+        [System.NonSerialized]
+        public TargetJoint2D MyTargetJoint = null;
+        [System.NonSerialized]
+        public Vector2 MyTargetPosition = Vector2.zero;
+
         public enum PartCategory
         {
             Core,
@@ -78,7 +84,12 @@ namespace Graves
 
         protected virtual void Update()
         {
+            if (MyPartCategory == PartCategory.Core)
+            {
+                float time = (Time.time * 5f);
 
+                MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time), Mathf.Sin(time)*0.2f) * 0.1f; ;
+            }
         }
 
         //@Public
@@ -123,6 +134,13 @@ namespace Graves
                 {
                     p.DockingParts(this);
                 }
+            }
+
+            //TJoint
+            MyTargetJoint = GetComponent<TargetJoint2D>();
+            if (MyTargetJoint)
+            {
+                MyTargetPosition = MyTargetJoint.target;
             }
         }
 
