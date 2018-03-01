@@ -94,25 +94,14 @@ public class gui_debug_3dLine : MonoBehaviour {
 
 	public LineRenderer draw(Vector3 a,float b){
 
-		lineList[Count] = Instantiate(Line3D);
-		Array.Resize(ref lineList,lineList.Length+1);		
-		lineList[Count].transform.parent = LineEmpty.transform;
+        setColor(Color.red);
+        draw(a + Vector3.right * b, a - Vector3.right * b);
+        setColor(Color.green);
+        draw(a + Vector3.up * b, a - Vector3.up * b);
+        setColor(Color.blue);
+        draw(a + Vector3.forward * b, a - Vector3.forward * b);
 
-		LineRenderer line = lineList[Count].GetComponent<LineRenderer>();
-		line.useWorldSpace = false;
-
-        line.startWidth = width;
-        line.endWidth = width;
-        line.positionCount = 2;
-        line.startColor = col;
-        line.endColor = col;
-
-        line.SetPosition(0,a);
-		line.SetPosition(1,a + Vector3.up*b);
-
-		Count++;
-
-		return line;
+        return null;
 	}
 
 	public LineRenderer draw(GameObject a,GameObject b,float c){

@@ -38,7 +38,7 @@ namespace Graves
 
         /**キャラクター管理クラス**/
         [System.NonSerialized]
-        public CharacterBase ParentCharacter;
+        public CharacterBase MyParent;
 
         /**ルートのパーツオブジェクト**/
         [System.NonSerialized]
@@ -48,12 +48,23 @@ namespace Graves
         [System.NonSerialized]
         public List<PartsBase> ChildParts = new List<PartsBase>();
 
-        /****/
+        /**Target Joint**/
         [System.NonSerialized]
         public TargetJoint2D MyTargetJoint = null;
         [System.NonSerialized]
         public Vector2 MyTargetPosition = Vector2.zero;
+        [System.NonSerialized]
+        public float MyTargetDefaultFrequency;
 
+        /**Hinge Joint**/
+        public struct HingeData
+        {
+            public Vector2 defaulAnchorPos;
+            public HingeJoint2D hingeJoint;
+        }
+        public List<HingeData> MyHingeJointList = new List<HingeData>();
+
+        /**肉体の役割とか**/
         public enum PartCategory
         {
             Core,
@@ -86,9 +97,25 @@ namespace Graves
         {
             if (MyPartCategory == PartCategory.Core)
             {
-                float time = (Time.time * 5f);
+                float time = (Time.time * MyParent.MovingSpeed);
 
-                MyTargetJoint.target = MyTargetPosition + new Vector2(Mathf.Cos(time), Mathf.Sin(time)*0.2f) * 0.1f; ;
+                MyTargetJoint.target =
+                    MyParent.MyPosition +
+                    MyTargetPosition + 
+                    new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x, Mathf.Sin(time) * MyParent.WalkCircle.y) * 0.1f; ;
+            }
+
+            if (MyTargetJoint)
+            {
+                gui_debug_3dLine.main.setWidth(0.005f);
+                gui_debug_3dLine.main.draw(MyTargetJoint.target,0.025f);
+
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    MyTargetJoint.frequency /= 1.5f;
+                }
+
+
             }
         }
 
@@ -99,6 +126,25 @@ namespace Graves
         {
             parent.ChildParts.Add(this);
             RootParts = parent;
+        }
+
+        /**ボディが破綻しそうになっていたら矯正する**/
+        public void CorrectBodyPosition()
+        {
+            //自分の親につながるヒンジの位置を保存するべき
+            foreach (HingeData h in MyHingeJointList)
+            {
+                //ボディが破綻しそうになっていたらデフォルトの位置に矯正する
+                Vector2 a = h.hingeJoint.connectedAnchor - h.defaulAnchorPos;
+                if (a.x != 0f || a.y != 0f)
+                {
+                    //Debug.Log(a);
+                    Transform t = h.hingeJoint.connectedBody.gameObject.transform;
+                    Vector3 v = t.up * a.y + t.right * a.x;
+
+                    h.hingeJoint.connectedBody.gameObject.transform.position += v;
+                }
+            }
         }
 
         //@Private
@@ -141,7 +187,20 @@ namespace Graves
             if (MyTargetJoint)
             {
                 MyTargetPosition = MyTargetJoint.target;
+                MyTargetDefaultFrequency = MyTargetJoint.frequency;
             }
+
+            //HJoint
+            HingeJoint2D[] hJoints = GetComponents<HingeJoint2D>();
+            foreach ( HingeJoint2D hj in hJoints )
+            {
+                HingeData h = new HingeData();
+                h.hingeJoint = hj;
+                h.defaulAnchorPos = hj.connectedAnchor;
+
+                MyHingeJointList.Add(h);
+            }
+
         }
 
         #endregion
