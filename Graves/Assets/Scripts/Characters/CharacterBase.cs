@@ -37,11 +37,11 @@ namespace Graves
         [System.NonSerialized]
         public int GroundedLegCount = 0;
 
-        [System.NonSerialized]
-        public float MovingSpeed = 6f;
+        //[System.NonSerialized]
+        public float MovingSpeed = 8f;
 
-        [System.NonSerialized]
-        public Vector2 WalkCircle = new Vector2(0.1f,0.2f);
+        //[System.NonSerialized]
+        public Vector2 WalkCircle = new Vector2(0.2f,0.2f);
 
         /**Battle**/
 
@@ -67,6 +67,9 @@ namespace Graves
             {
                 Move(MyPosition + Vector2.right);
             }
+
+            gui_debug_3dLine.main.setWidth(0.01f);
+            gui_debug_3dLine.main.draw(MyPosition, 0.085f);
 
             //
             Movement();

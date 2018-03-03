@@ -27,13 +27,15 @@ namespace Graves
         public Rigidbody2D MyRigidbody;
 
         /**boxcollider**/
+        [System.NonSerialized]
         public BoxCollider2D MyBoxCollider;
 
         /**SpriteRenderer**/
+        [System.NonSerialized]
         public SpriteRenderer MySpriteRenderer;
 
         /**parts size**/
-        [System.NonSerialized]
+        //[System.NonSerialized]
         public Vector2 Size = Vector2.one;
 
         /**キャラクター管理クラス**/
@@ -75,9 +77,11 @@ namespace Graves
         }
 
         /**自分の役割　手や足など**/
+        [System.NonSerialized]
         public PartCategory MyPartCategory = PartCategory.None;
 
         /**HitPoint**/
+        [System.NonSerialized]
         public int HitPoint = 0;
 
         //@Private
@@ -95,27 +99,15 @@ namespace Graves
 
         protected virtual void Update()
         {
-            if (MyPartCategory == PartCategory.Core)
-            {
-                float time = (Time.time * MyParent.MovingSpeed);
-
-                MyTargetJoint.target =
-                    MyParent.MyPosition +
-                    MyTargetPosition + 
-                    new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x, Mathf.Sin(time) * MyParent.WalkCircle.y) * 0.1f; ;
-            }
-
             if (MyTargetJoint)
             {
-                gui_debug_3dLine.main.setWidth(0.005f);
-                gui_debug_3dLine.main.draw(MyTargetJoint.target,0.025f);
+                //gui_debug_3dLine.main.setWidth(0.005f);
+                //gui_debug_3dLine.main.draw(MyTargetJoint.target, 0.025f);
+            }
 
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    MyTargetJoint.frequency /= 1.5f;
-                }
-
-
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                PopTextController.main.print("0",transform.position);
             }
         }
 
@@ -210,5 +202,14 @@ namespace Graves
 
 
         #endregion
+
+        #if UNITY_EDITOR
+
+        private void OnDrawGizmos()
+        {
+            
+        }
+
+        #endif
     }
 }

@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: bf7b40a77ec38444a9c9a5e8bf639be9
+timeCreated: 1520064691
+licenseType: Free
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 64
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: MS Mincho
+  fontNames:
+  - MS Mincho
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
