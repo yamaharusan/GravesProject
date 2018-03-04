@@ -26,6 +26,9 @@ namespace Graves
         [System.NonSerialized]
         public Rigidbody2D MyRigidbody;
 
+        [System.NonSerialized]
+        public PhysicsMaterial2D deadMaterial;
+
         /**boxcollider**/
         [System.NonSerialized]
         public BoxCollider2D MyBoxCollider;
@@ -56,6 +59,9 @@ namespace Graves
         [System.NonSerialized]
         public Vector2 MyTargetPosition = Vector2.zero;
         [System.NonSerialized]
+        public Vector2 DefaultMyTargetPosition = Vector2.zero;
+
+        [System.NonSerialized]
         public float MyTargetDefaultFrequency;
 
         /**Hinge Joint**/
@@ -82,7 +88,10 @@ namespace Graves
 
         /**HitPoint**/
         [System.NonSerialized]
-        public int HitPoint = 0;
+        public int HitPoint = 20;
+
+        [System.NonSerialized]
+        public bool IsLive = true;
 
         //@Private
 
@@ -101,17 +110,72 @@ namespace Graves
         {
             if (MyTargetJoint)
             {
-                //gui_debug_3dLine.main.setWidth(0.005f);
-                //gui_debug_3dLine.main.draw(MyTargetJoint.target, 0.025f);
+                gui_debug_3dLine.main.setWidth(0.01f);
+                //gui_debug_3dLine.main.draw(MyTargetJoint.target, 0.05f);
             }
 
-            if (Input.GetKeyDown(KeyCode.S))
+            if (IsLive)
             {
-                PopTextController.main.print("0",transform.position);
+                if (HitPoint <= 0)
+                {
+                    //子も道連れ
+                    foreach (PartsBase part in ChildParts)
+                    {
+                        part.HitPoint = 0;
+                    }
+
+                    //Destroy TargetJoint
+                    if (MyTargetJoint)
+                    {
+                        Destroy(MyTargetJoint);
+                    }
+
+                    //Change Physics Material
+                    if (MyRigidbody)
+                    {
+                        //gameObject.layer = 0;
+                        MyRigidbody.sharedMaterial = deadMaterial;
+                    }
+
+                    Destroy(gameObject,5f);
+
+                    //おれはしんだなむ
+                    IsLive = false;
+                }
             }
         }
 
         //@Public
+        /**Attack**/
+        public void AddDamage(int damage, Ray ray, float force)
+        {
+            PopTextController.main.print(damage.ToString(), ray.origin);
+
+            HitPoint -= damage;
+            if (HitPoint <= 0)
+            {
+                //親のヒンジを消す
+                if (transform.parent)
+                {
+                    HingeJoint2D[] joints = transform.parent.gameObject.GetComponents<HingeJoint2D>();
+
+                    foreach (HingeJoint2D j in joints)
+                    {
+                        if (j.connectedBody == MyRigidbody)
+                        {
+                            Destroy(j);
+                        }
+                    }
+                }
+
+                transform.parent = null;
+            }
+
+            if (MyRigidbody)
+            {
+                MyRigidbody.AddForceAtPosition(ray.direction * (force * damage), ray.origin);
+            }
+        }
 
         /**この関数を呼んだ相手を親に登録**/
         public void DockingParts(PartsBase parent)
@@ -126,15 +190,18 @@ namespace Graves
             //自分の親につながるヒンジの位置を保存するべき
             foreach (HingeData h in MyHingeJointList)
             {
-                //ボディが破綻しそうになっていたらデフォルトの位置に矯正する
-                Vector2 a = h.hingeJoint.connectedAnchor - h.defaulAnchorPos;
-                if (a.x != 0f || a.y != 0f)
+                if (h.hingeJoint)
                 {
-                    //Debug.Log(a);
-                    Transform t = h.hingeJoint.connectedBody.gameObject.transform;
-                    Vector3 v = t.up * a.y + t.right * a.x;
+                    //ボディが破綻しそうになっていたらデフォルトの位置に矯正する
+                    Vector2 a = h.hingeJoint.connectedAnchor - h.defaulAnchorPos;
+                    if (a.x != 0f || a.y != 0f)
+                    {
+                        //Debug.Log(a);
+                        Transform t = h.hingeJoint.connectedBody.gameObject.transform;
+                        Vector3 v = t.up * a.y + t.right * a.x;
 
-                    h.hingeJoint.connectedBody.gameObject.transform.position += v;
+                        h.hingeJoint.connectedBody.gameObject.transform.position += v;
+                    }
                 }
             }
         }
@@ -179,6 +246,9 @@ namespace Graves
             if (MyTargetJoint)
             {
                 MyTargetPosition = MyTargetJoint.target;
+
+                DefaultMyTargetPosition = MyTargetPosition;
+
                 MyTargetDefaultFrequency = MyTargetJoint.frequency;
             }
 
@@ -193,6 +263,9 @@ namespace Graves
                 MyHingeJointList.Add(h);
             }
 
+            //HitPoint
+            HitPoint = MyParent.StandardHitPoint * 2;
+            IsLive = true;
         }
 
         #endregion

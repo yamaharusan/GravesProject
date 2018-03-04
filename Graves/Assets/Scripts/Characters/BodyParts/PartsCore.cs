@@ -11,8 +11,6 @@ namespace Graves
         protected override void Start()
         {
             base.Start();
-
-
         }
 
         // Update is called once per frame
@@ -22,18 +20,12 @@ namespace Graves
 
             if (MyTargetJoint)
             {
-
                 float time = (Time.time * MyParent.MovingSpeed);
 
                 MyTargetJoint.target =
                     MyParent.MyPosition +
                     MyTargetPosition +
                     new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x, Mathf.Sin(time) * MyParent.WalkCircle.y) * 0.1f;
-
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    MyTargetJoint.frequency /= 1.5f;
-                }
             }
         }
 
@@ -43,6 +35,8 @@ namespace Graves
             base.Initialization();
 
             MyPartCategory = PartCategory.Core;
+
+            HitPoint = MyParent.StandardHitPoint * 2;
 
             if (MyTargetJoint)
             {

@@ -1,11 +1,18 @@
 fileFormatVersion: 2
 guid: b7085589cb99e2741a309401c8be72fd
-timeCreated: 1519833510
+timeCreated: 1520152705
 licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - MyRigidbody: {instanceID: 0}
+  - deadMaterial: {instanceID: 0}
+  - MyBoxCollider: {instanceID: 0}
+  - MySpriteRenderer: {instanceID: 0}
+  - MyParent: {instanceID: 0}
+  - RootParts: {instanceID: 0}
+  - MyTargetJoint: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

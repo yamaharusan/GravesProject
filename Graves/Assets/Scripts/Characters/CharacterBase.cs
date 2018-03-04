@@ -12,14 +12,19 @@ namespace Graves
 {
     public class CharacterBase : MonoBehaviour
     {
-
         //@Public
         /**Parts**/
         [System.NonSerialized]
         public List<PartsBase> MyParts = new List<PartsBase>();
 
         [System.NonSerialized]
+        public PartsCore Core;
+
+        [System.NonSerialized]
         public List<PartsLeg> MyLegs = new List<PartsLeg>();
+
+        [System.NonSerialized]
+        public List<PartsHand> MyHands = new List<PartsHand>();
 
         /**Movement**/
         [System.NonSerialized]
@@ -32,7 +37,13 @@ namespace Graves
         public bool IsWalk = false;
 
         [System.NonSerialized]
+        public bool IsChangeDirection = false;
+
+        [System.NonSerialized]
         public int LegCount = 0;
+
+        [System.NonSerialized]
+        public int HandCount = 0;
 
         [System.NonSerialized]
         public int GroundedLegCount = 0;
@@ -44,7 +55,12 @@ namespace Graves
         public Vector2 WalkCircle = new Vector2(0.2f,0.2f);
 
         /**Battle**/
+        [System.NonSerialized]
+        public int EnemyLayer = 0;
 
+        public string EnemyLayerName = "Enemy";
+
+        public int StandardHitPoint = 10;
 
         //@Private
         private float glavity = 0f;
@@ -58,41 +74,65 @@ namespace Graves
         // Update is called once per frame
         protected virtual void Update()
         {
-            //Debug
-            if (Input.GetKey(KeyCode.A))
-            {
-                Move(MyPosition - Vector2.right);
-            }
-            else if (Input.GetKey(KeyCode.D))
-            {
-                Move(MyPosition + Vector2.right);
-            }
+            //gui_debug_3dLine.main.setWidth(0.01f);
+            //gui_debug_3dLine.main.draw(MyPosition, 0.085f);
 
-            gui_debug_3dLine.main.setWidth(0.01f);
-            gui_debug_3dLine.main.draw(MyPosition, 0.085f);
+            //おれはしんだのか
+            CheckDead();
 
             //
-            Movement();
+            Main();
 
+            //いどう
+            Movement();
+        }
+
+        protected virtual void Main()
+        {
+
+        }
+
+        protected virtual void CheckDead()
+        {
+            RefreshPartsInfo();
+
+            if(LegCount == 0)
+            {
+                if (Core.IsLive)
+                {
+                    Core.HitPoint = 0;
+                }
+
+                Destroy(this);
+            }
+        }
+
+        private void RefreshPartsInfo()
+        {
+            LegCount = 0;
+            foreach (PartsLeg leg in MyLegs)
+            {
+                if (leg.IsLive)
+                {
+                    leg.MyLegCount = LegCount;
+                    LegCount++;
+                }
+            }
+
+            HandCount = 0;
+            foreach (PartsHand hand in MyHands)
+            {
+                if (hand.IsLive)
+                {
+                    HandCount++;
+                }
+            }
         }
 
         /**移動に関する処理**/
         protected virtual void Movement()
         {
             MyDirection.Normalize();
-
-            //6f毎に脚の数を更新する
-            if (Time.frameCount % 6 == 0)
-            {
-                LegCount = 0;
-                foreach (PartsBase p in MyParts)
-                {
-                    if (p.MyPartCategory == PartsBase.PartCategory.Leg)
-                    {
-                        LegCount++;
-                    }
-                }
-            }
 
             //地形に追従して上下移動する処理
             if (GroundedLegCount > 0)//接地判定
@@ -130,14 +170,14 @@ namespace Graves
             Vector2 p = target - MyPosition;
             if (p.x > 0f)
             {
-                MyDirection = Vector2.right;
+                MyDirection =  Vector2.right;
             }
             else
             {
                 MyDirection = -Vector2.right;
             }
 
-            ChangeDirection(MyDirection.x);
+            //ChangeDirection(MyDirection.x);
 
             IsWalk = true;
 
@@ -146,6 +186,7 @@ namespace Graves
 
         protected IEnumerator StopWalk()
         {
+            yield return null;
             yield return null;
             IsWalk = false;
         }
@@ -168,6 +209,13 @@ namespace Graves
                 //親に設定
                 p.MyParent = this;
 
+                //Core
+                PartsCore core = p.gameObject.GetComponent<PartsCore>();
+                if (core)
+                {
+                    Core = core;
+                }
+
                 //脚の設定
                 PartsLeg leg = p.gameObject.GetComponent<PartsLeg>();
                 if (leg)
@@ -176,7 +224,17 @@ namespace Graves
                     LegCount++;
                     MyLegs.Add(leg);
                 }
+
+                //手の設定
+                PartsHand hand = p.gameObject.GetComponent<PartsHand>();
+                if (hand)
+                {
+                    MyHands.Add(hand);
+                }
             }
+
+            //
+            EnemyLayer = (int)Mathf.Pow(2,LayerMask.NameToLayer(EnemyLayerName));
 
         }
 
@@ -248,7 +306,7 @@ namespace Graves
                         //ヒンジジョイントのリミットを反転
                         foreach (PartsBase.HingeData h in p.MyHingeJointList)
                         {
-                            if (h.hingeJoint.useLimits)
+                            if (h.hingeJoint && h.hingeJoint.useLimits)
                             {
                                 JointAngleLimits2D lim = h.hingeJoint.limits;
                                 float l = -lim.min;
@@ -270,6 +328,15 @@ namespace Graves
                     }
                 }
             }
+
+            IsChangeDirection = true;
+            StartCoroutine(RestoreIsChangeDirection());
+        }
+
+        private IEnumerator RestoreIsChangeDirection()
+        {
+            yield return null;
+            IsChangeDirection = false;
         }
 
         #endregion

@@ -5,28 +5,40 @@ namespace Graves
 {
     public class PartsHand : PartsBase
     {
-
         [System.NonSerialized]
         public bool IsAttacking = false;
 
+        private bool EnableSword = false;
+
         [System.NonSerialized]
-        public float attackTime = 0f;
+        public int AttackDamage = 10;
+
+        [System.NonSerialized]
+        public float AttackTime = 0.8f;
+
+        [System.NonSerialized]
+        public float MaxHandLength = 0f;
+
+        private List<GameObject> attackedParts = new List<GameObject>();
 
         private float HandLength = 0f;
+
         private Vector2 TargetPosition = Vector2.zero;
         private Vector2 TargetDirection = Vector2.zero;
+
+        private List<FixedJoint2D> FixedJointList = new List<FixedJoint2D>();
 
         // Use this for initialization
         protected override void Start()
         {
             base.Start();
+            MaxHandLength = GetLength(transform);
         }
 
         // Update is called once per frame
         protected override void Update()
         {
             base.Update();
-
             //Walk
             if (MyParent)
             {
@@ -35,7 +47,7 @@ namespace Graves
                     if (IsAttacking)
                         TargetDirection = (TargetPosition - (Vector2)transform.position).normalized;
                     else
-                        TargetDirection = Vector2.up;
+                        TargetDirection = Vector2.right * MyParent.transform.localScale.x;
 
                     if (MyRigidbody)
                     {
@@ -43,16 +55,28 @@ namespace Graves
                         MyRigidbody.AddTorque(d * 15f - MyRigidbody.angularVelocity * 0.01f);
                     }
 
-                    if (Input.GetKey(KeyCode.Mouse0))
-                    {
-                        AttackPierce(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                    }
-
                     MyTargetJoint.target =
                         MyParent.MyPosition
                         + MyTargetPosition
                         + TargetDirection * HandLength;
+
+                    //攻撃判定
+                    if (EnableSword)
+                        JudgeAttack();
                 }
+
+                if (MyParent.IsChangeDirection)
+                {
+                    foreach (FixedJoint2D f in FixedJointList)
+                    {
+                        if (f)
+                        {
+                            Destroy(f);
+                        }
+                    }
+                    FixedJointList.Clear();
+                }
+
             }
         }
 
@@ -63,22 +87,111 @@ namespace Graves
 
             MyPartCategory = PartCategory.Hand;
 
+            HitPoint = MyParent.StandardHitPoint * 4;
+
             if (MyTargetJoint)
             {
                 //MyTargetJoint.frequency = 0f;
             }
         }
 
-        protected float GetLength(Transform t)
+        protected void JudgeAttack()
         {
-            if (t.parent)
+            Vector2 u = transform.up;
+            Vector2 p = (Vector2)transform.position + u * (Size.y / 2f);
+
+            //レイキャストで当たったかどうか判定
+            RaycastHit2D[] hit = Physics2D.RaycastAll(p,-u,Size.y,MyParent.EnemyLayer);
+
+            //当たったら
+            if (hit.Length > 0)
             {
-                return GetLength(t.parent);
+                foreach (RaycastHit2D ray in hit)
+                {
+                    bool found = false;
+
+                    GameObject obj = ray.transform.gameObject;
+                    foreach (GameObject f_obj in attackedParts)
+                    {
+                        if(obj == f_obj)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        gui_debug_3dLine.main.draw(ray.point,0.2f);
+
+                        PartsBase part = obj.GetComponent<PartsBase>();
+                        if (part && part.IsLive)
+                        {
+                            int damageAttenuation = 1;
+                            if (attackedParts.Count > 0)
+                            {
+                                damageAttenuation = attackedParts.Count+1;
+                            }
+
+                            Ray r = new Ray(ray.point,MyRigidbody.velocity);
+                            part.AddDamage(AttackDamage / damageAttenuation,r,60f);
+
+                            if (part.HitPoint <= 0)
+                            {
+                                FixedJoint2D f = gameObject.AddComponent<FixedJoint2D>();
+                                f.connectedBody = part.MyRigidbody;
+
+                                FixedJointList.Add(f);
+                                Destroy(f, 5f);
+                            }
+                        }
+
+                        attackedParts.Add(obj);
+                    }
+                }
             }
-            return 0f;
+
+            gui_debug_3dLine.main.setColor(Color.red);
+            gui_debug_3dLine.main.draw(p, p - u * Size.y);
         }
 
+        protected float GetLength(Transform t)
+        {
+            float length = 0f;
+            Transform t_p = t;
+            Vector2 temp = t_p.position;
 
+            while (t_p.parent)
+            {
+                Rigidbody2D rb = t_p.GetComponent<Rigidbody2D>();
+
+                t_p = t_p.parent;
+                HingeJoint2D[] joints = t_p.gameObject.GetComponents<HingeJoint2D>();
+
+                if (rb && joints.Length > 0)
+                {
+                    foreach (HingeJoint2D j in joints)
+                    {
+                        if (j.connectedBody == rb)
+                        {
+                            Vector2 p = t_p.position + t_p.TransformVector(j.anchor);
+
+                            length += (temp - p).magnitude;
+                            temp = p;
+
+                            gui_debug_3dLine.main.draw(temp, 0.1f);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return length;
+        }
 
         public void AttackPierce(Vector2 target)
         {
@@ -89,17 +202,29 @@ namespace Graves
             }
         }
 
+        void OnDestroy()
+        {
+
+        }
+
         protected IEnumerator C_AttackPierce(Vector2 target)
         {
             TargetPosition = target;
             HandLength = -0.1f;
 
-            yield return new WaitForSeconds(1f);
+            attackedParts.Clear();
+
+            yield return new WaitForSeconds(AttackTime);
 
             TargetPosition = TargetDirection * 10f;
-            HandLength = 1.5f;
+            HandLength = MaxHandLength * 1.5f;
+            EnableSword = true;
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
+
+            EnableSword = false;
+
+            yield return new WaitForSeconds(AttackTime);
 
             HandLength = -0.1f;
 

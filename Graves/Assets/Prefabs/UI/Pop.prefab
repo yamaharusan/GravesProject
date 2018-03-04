@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 222130660744825934}
   - component: {fileID: 114915922649408800}
   - component: {fileID: 114899896562002186}
+  - component: {fileID: 114249246708217958}
   m_Layer: 5
   m_Name: Pop
   m_TagString: Untagged
@@ -29,6 +30,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &114249246708217958
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1607532802329268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 2, y: -2}
+  m_UseGraphicAlpha: 1
 --- !u!114 &114899896562002186
 MonoBehaviour:
   m_ObjectHideFlags: 1

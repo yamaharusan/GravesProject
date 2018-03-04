@@ -7,12 +7,12 @@ namespace Graves
 {
     public class PopText : MonoBehaviour
     {
-        private StdLib lib = new StdLib();
+        //private StdLib lib = new StdLib();
 
         private RectTransform rect;
         private Text text;
 
-        private Vector3 position = Vector3.zero;
+        //private Vector3 position = Vector3.zero;
 
         [System.NonSerialized]
         public float lifeSpan = 0.5f;

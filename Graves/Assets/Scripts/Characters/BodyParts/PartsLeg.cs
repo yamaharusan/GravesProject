@@ -58,7 +58,7 @@ namespace Graves
 
                     if (MyParent.IsWalk)
                     {
-                        Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
+                        //Vector2 mtp = (transform.position + transform.TransformVector(MyTargetJoint.anchor));
 
                         //float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
 
@@ -111,6 +111,8 @@ namespace Graves
             base.Initialization();
 
             MyPartCategory = PartCategory.Leg;
+
+            HitPoint = MyParent.StandardHitPoint * 2;
 
             if (MyTargetJoint)
             {
