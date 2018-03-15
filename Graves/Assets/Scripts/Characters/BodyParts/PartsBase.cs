@@ -149,7 +149,16 @@ namespace Graves
         /**Attack**/
         public void AddDamage(int damage, Ray ray, float force)
         {
-            PopTextController.main.print(damage.ToString(), ray.origin);
+            PopText text = PopTextController.main.print(damage.ToString(), ray.origin);
+
+            if (MyParent)
+            {
+                if(MyParent.MyCategory == CharacterBase.CharacterCategory.Player)
+                {
+                    text.text.color = Color.red;
+                    CameraController.main.effect1(0.2f);
+                }
+            }
 
             HitPoint -= damage;
             if (HitPoint <= 0)

@@ -10,7 +10,7 @@ namespace Graves
         //private StdLib lib = new StdLib();
 
         private RectTransform rect;
-        private Text text;
+        public Text text;
 
         //private Vector3 position = Vector3.zero;
 

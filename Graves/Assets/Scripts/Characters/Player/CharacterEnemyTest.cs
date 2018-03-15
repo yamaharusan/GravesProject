@@ -46,7 +46,7 @@ namespace Graves
                 {
                     foreach (PartsHand hand in MyHands)
                     {
-                        if(hand)
+                        if (hand)
                             hand.AttackPierce(player.Core.transform.position);
                     }
                 }

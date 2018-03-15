@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace Graves
 {
     public class CharacterPlayer : CharacterBase
@@ -20,6 +21,8 @@ namespace Graves
         protected override void Start()
         {
             base.Start();
+
+            MyCategory = CharacterCategory.Player;
 
             mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             main = this;
@@ -95,7 +98,6 @@ namespace Graves
                 Vector3 camPos = (Vector3)focusPosition;
                 CameraController.main.look(camPos, camPos - Vector3.forward * 10f);
             }
-
         }
 
         public override void Move(Vector2 target)

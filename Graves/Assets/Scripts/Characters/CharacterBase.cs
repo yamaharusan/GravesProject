@@ -55,6 +55,17 @@ namespace Graves
         public Vector2 WalkCircle = new Vector2(0.2f,0.2f);
 
         /**Battle**/
+        public enum CharacterCategory
+        {
+            Player,
+            Enemy,
+            None = -1
+        }
+
+        /**自分の役割**/
+        [System.NonSerialized]
+        public CharacterCategory MyCategory = CharacterCategory.Enemy;
+
         [System.NonSerialized]
         public int EnemyLayer = 0;
 
@@ -89,14 +100,19 @@ namespace Graves
 
         protected virtual void Main()
         {
-
+        
         }
 
         protected virtual void CheckDead()
         {
             RefreshPartsInfo();
 
-            if(LegCount == 0)
+            if (HandCount == 0)
+            {
+                MovingSpeed = 2f;
+            }
+
+            if (LegCount == 0)
             {
                 if (Core.IsLive)
                 {
@@ -266,71 +282,77 @@ namespace Graves
         protected void Mirror(float d)
         {
             //反転
-            bool isChanged = false;
-            Vector2 temp_pos = MyParts[0].transform.position;
-            transform.position = MyPosition;
-            MyParts[0].transform.position = temp_pos;
 
-            if (d > 0)
+            if (MyParts.Count > 0)
             {
-                if (transform.localScale.x < 0)
-                {
-                    transform.localScale = new Vector3(1f, 1f, 1f);
-                    MyDirection = Vector2.right;
-                    isChanged = true;
-                }
-            }
-            else if (d < 0)
-            {
-                if (transform.localScale.x > 0)
-                {
-                    transform.localScale = new Vector3(-1f, 1f, 1f);
-                    MyDirection = -Vector2.right;
-                    isChanged = true;
-                }
-            }
 
-            //変更適用
-            foreach (PartsBase p in MyParts)
-            {
-                //
-                if (p.MyRigidbody)
-                {
-                    //ボディの破綻を補正
-                    p.CorrectBodyPosition();
+                bool isChanged = false;
+                Vector2 temp_pos = MyParts[0].transform.position;
+                transform.position = MyPosition;
+                MyParts[0].transform.position = temp_pos;
 
-                    //もし反転していたら
-                    if (isChanged)
+                if (d > 0)
+                {
+                    if (transform.localScale.x < 0)
                     {
-                        
-                        //ヒンジジョイントのリミットを反転
-                        foreach (PartsBase.HingeData h in p.MyHingeJointList)
-                        {
-                            if (h.hingeJoint && h.hingeJoint.useLimits)
-                            {
-                                JointAngleLimits2D lim = h.hingeJoint.limits;
-                                float l = -lim.min;
-                                lim.min = -h.hingeJoint.limits.max;
-                                lim.max = l;
-
-                                h.hingeJoint.limits = lim;
-                            }
-                        }
-
-                        //ターゲットジョイントの位置を反転
-                        if (p.MyTargetJoint)
-                        {
-                            Vector2 v = p.MyTargetPosition;
-                            p.MyTargetPosition = new Vector3(-v.x, v.y);
-                        }
-
-                        
+                        transform.localScale = new Vector3(1f, 1f, 1f);
+                        MyDirection = Vector2.right;
+                        isChanged = true;
                     }
                 }
-            }
+                else if (d < 0)
+                {
+                    if (transform.localScale.x > 0)
+                    {
+                        transform.localScale = new Vector3(-1f, 1f, 1f);
+                        MyDirection = -Vector2.right;
+                        isChanged = true;
+                    }
+                }
 
-            IsChangeDirection = true;
-            StartCoroutine(RestoreIsChangeDirection());
+                //変更適用
+                foreach (PartsBase p in MyParts)
+                {
+                    //
+                    if (p.MyRigidbody)
+                    {
+                        //ボディの破綻を補正
+                        p.CorrectBodyPosition();
+
+                        //もし反転していたら
+                        if (isChanged)
+                        {
+
+                            //ヒンジジョイントのリミットを反転
+                            foreach (PartsBase.HingeData h in p.MyHingeJointList)
+                            {
+                                if (h.hingeJoint && h.hingeJoint.useLimits)
+                                {
+                                    JointAngleLimits2D lim = h.hingeJoint.limits;
+                                    float l = -lim.min;
+                                    lim.min = -h.hingeJoint.limits.max;
+                                    lim.max = l;
+
+                                    h.hingeJoint.limits = lim;
+                                }
+                            }
+
+                            //ターゲットジョイントの位置を反転
+                            if (p.MyTargetJoint)
+                            {
+                                Vector2 v = p.MyTargetPosition;
+                                p.MyTargetPosition = new Vector3(-v.x, v.y);
+                            }
+
+
+                        }
+                    }
+                }
+
+                IsChangeDirection = true;
+                StartCoroutine(RestoreIsChangeDirection());
+
+            }
         }
 
         private IEnumerator RestoreIsChangeDirection()

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.SceneManagement;
+
 /**
     キャラクターの基本的なスケール感として10cm以下を想定
 
@@ -21,7 +23,10 @@ namespace Graves
         // Update is called once per frame
         void Update()
         {
-
+            if (Input.GetKey(KeyCode.R))
+            {
+                SceneManager.LoadScene("test");
+            }
         }
     }
 }
