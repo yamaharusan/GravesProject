@@ -17,7 +17,7 @@ namespace Graves
         // Use this for initialization
         void Start()
         {
-
+            CharacterEnemyTest.list.Clear();
         }
 
         // Update is called once per frame

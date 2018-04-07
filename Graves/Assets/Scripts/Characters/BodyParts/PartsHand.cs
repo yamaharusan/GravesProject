@@ -15,7 +15,7 @@ namespace Graves
         private bool IsParrySword = false;
 
         [System.NonSerialized]
-        public int AttackDamage = 10;
+        public int AttackDamage = 20;
 
         [System.NonSerialized]
         public float AttackTime = 0.4f;
@@ -32,11 +32,29 @@ namespace Graves
 
         private List<FixedJoint2D> FixedJointList = new List<FixedJoint2D>();
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         // Use this for initialization
         protected override void Start()
         {
             base.Start();
+
             MaxHandLength = GetLength(transform);
+            HitPoint = MyParent.StandardHitPoint * 4;
+
+            if (MyParent)
+            {
+                Vector2 v = new Vector2(
+                    Random.Range(-MaxHandLength, MaxHandLength),
+                    Random.Range(-MaxHandLength, MaxHandLength)) * 0.3f;
+
+                MyTargetPosition = MyParent.Core.MyTargetPosition/2f + v;
+            }
+
+            MyRigidbody.mass = 1f;
         }
 
         // Update is called once per frame
@@ -56,7 +74,7 @@ namespace Graves
                     if (MyRigidbody)
                     {
                         float d = Vector2.Dot(TargetDirection, transform.right);
-                        MyRigidbody.AddTorque(d * 15f - MyRigidbody.angularVelocity * 0.01f);
+                        MyRigidbody.AddTorque(-d * 5f - MyRigidbody.angularVelocity * 0.001f);
                     }
 
                     MyTargetJoint.target =
@@ -89,8 +107,6 @@ namespace Graves
             base.Initialization();
 
             MyPartCategory = PartCategory.Hand;
-
-            HitPoint = MyParent.StandardHitPoint * 4;
 
             if (MyTargetJoint)
             {
@@ -131,7 +147,7 @@ namespace Graves
                             //gui_debug_3dLine.main.draw(ray.point,0.2f);
 
                             PartsBase part = obj.GetComponent<PartsBase>();
-                            if (part && part.IsLive)
+                            if (part && (part.IsLive || true))
                             {
                                 int damageAttenuation = 1;
                                 if (attackedParts.Count > 0)
@@ -153,9 +169,9 @@ namespace Graves
                                 */
 
                                 Ray r = new Ray(ray.point, MyRigidbody.velocity);
-                                part.AddDamage(AttackDamage / damageAttenuation, r, 200f);
+                                part.AddDamage(AttackDamage / damageAttenuation, r, 2f);
 
-                                if (part.HitPoint <= 0 || true)
+                                if (true || part.HitPoint <= 0)
                                 {
                                     if (GetComponent<FixedJoint2D>() == null)
                                     {
@@ -201,47 +217,9 @@ namespace Graves
             }
         }
 
-        protected float GetLength(Transform t)
-        {
-            float length = 0f;
-            Transform t_p = t;
-            Vector2 temp = t_p.position;
-
-            while (t_p.parent)
-            {
-                Rigidbody2D rb = t_p.GetComponent<Rigidbody2D>();
-
-                t_p = t_p.parent;
-                HingeJoint2D[] joints = t_p.gameObject.GetComponents<HingeJoint2D>();
-
-                if (rb && joints.Length > 0)
-                {
-                    foreach (HingeJoint2D j in joints)
-                    {
-                        if (j.connectedBody == rb)
-                        {
-                            Vector2 p = t_p.position + t_p.TransformVector(j.anchor);
-
-                            length += (temp - p).magnitude;
-                            temp = p;
-
-                            //gui_debug_3dLine.main.draw(temp, 0.1f);
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return length;
-        }
-
         public void AttackPierce(Vector2 target)
         {
-            if (!IsAttacking)
+            if (IsLive && !IsAttacking)
             {
                 IsAttacking = true;
                 StartCoroutine(C_AttackPierce(target));
@@ -250,7 +228,7 @@ namespace Graves
 
         void OnDestroy()
         {
-
+            StopAllCoroutines();
         }
 
         public IEnumerator C_Parry(float time)
@@ -282,7 +260,7 @@ namespace Graves
             yield return new WaitForSeconds(AttackTime);
 
             TargetPosition = TargetDirection * 10f;
-            HandLength = MaxHandLength * 1.5f;
+            HandLength = MaxHandLength * 1.05f;
             EnableSword = true;
 
             yield return new WaitForSeconds(0.3f);

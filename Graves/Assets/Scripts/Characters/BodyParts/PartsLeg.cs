@@ -17,10 +17,38 @@ namespace Graves
 
         private bool grounded = false;
 
+        private float MyLegLength;
+
+        private float MyMovingSpeed;
+
+        private Vector2 MyWalkCircle;
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         // Use this for initialization
         protected override void Start()
         {
             base.Start();
+
+            MyLegLength = GetLength(transform);
+
+            //Debug.Log(MyLegLength);
+
+            if (MyTargetJoint)
+            {
+                MyTargetPosition = new Vector2(Random.Range(-MyLegLength, MyLegLength) / 6f, 0f);
+            }
+
+            MyMovingSpeed = MyParent.MovingSpeed * (MyLegLength / 2f);
+
+            MyWalkCircle = MyParent.WalkCircle * (MyLegLength / 0.6f);
+
+            HitPoint = MyParent.StandardHitPoint * 2;
+
+            MyRigidbody.mass = 1f;
         }
 
         // Update is called once per frame
@@ -53,7 +81,7 @@ namespace Graves
                 {
                     if (MyRigidbody)
                     {
-                        MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.005f);
+                        MyRigidbody.AddTorque(-transform.up.x * 5f - MyRigidbody.angularVelocity * 0.001f);
                     }
 
                     if (MyParent.IsWalk)
@@ -63,14 +91,14 @@ namespace Graves
                         //float tjl = Mathf.Lerp(-1f, 1f, 0.4f - tjv.y) * 10f;
 
                         float direction = MyParent.MyDirection.x;
-                        float time = -(Time.time * MyParent.MovingSpeed) + (Mathf.PI * (2f / MyParent.LegCount) * MyLegCount);
+                        float time = -(Time.time * MyMovingSpeed) + (Mathf.PI * (2f / MyParent.LegCount) * MyLegCount);
 
                         //MyTargetPosition += Vector2.up * tjl * Time.deltaTime;
 
                         MyTargetJoint.target =
                             MyParent.MyPosition +
                             MyTargetPosition +
-                            new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x * direction, Mathf.Sin(time) * MyParent.WalkCircle.y);
+                            new Vector2(Mathf.Cos(time) * MyWalkCircle.x * direction, Mathf.Sin(time) * MyWalkCircle.y);
 
                         //Grounded
                         if (IsGrounded)
@@ -81,8 +109,8 @@ namespace Graves
                             MyParent.MyPosition -=
                                 Vector2.right *
                                 (
-                                    (Mathf.Cos(time - (Time.deltaTime * MyParent.MovingSpeed)) - Mathf.Cos(time)) * 
-                                    MyParent.WalkCircle.x / 
+                                    (Mathf.Cos(time - (Time.deltaTime * MyMovingSpeed)) - Mathf.Cos(time)) * 
+                                    MyWalkCircle.x / 
                                     MyParent.GroundedLegCount
                                 ) * direction;
 
@@ -99,7 +127,7 @@ namespace Graves
                         MyTargetJoint.target =
                             MyParent.MyPosition +
                             MyTargetPosition -
-                            Vector2.up * 0.2f;
+                            Vector2.up * 0.05f;
                     }
                 }
             }
@@ -112,11 +140,9 @@ namespace Graves
 
             MyPartCategory = PartCategory.Leg;
 
-            HitPoint = MyParent.StandardHitPoint * 2;
-
             if (MyTargetJoint)
             {
-
+                MyTargetJoint.anchor = Vector2.up * Size.y * 1.01f;
             }
         }
 

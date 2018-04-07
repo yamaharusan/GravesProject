@@ -109,10 +109,10 @@ namespace Graves
             e1c = t;
         }
 
-        float e2c = 0f;
+        //float e2c = 0f;
         public void effect2(float t)
         {
-            e2c = t;
+            //e2c = t;
         }
 
         float e3c = 0f;

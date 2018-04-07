@@ -16,7 +16,8 @@ public class Spawn : MonoBehaviour {
         if (Time.frameCount % 300 == 0)
         {
             GameObject o = Instantiate(obj);
-            o.transform.position = transform.position;
+            o.transform.position = transform.position + (Vector3.right * Random.Range(-8f,8f));
+            o.GetComponent<Graves.CharacterBase>().MyPosition = o.transform.position;
         }
 	}
 }

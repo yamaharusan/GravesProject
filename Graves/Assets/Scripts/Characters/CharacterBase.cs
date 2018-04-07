@@ -26,6 +26,10 @@ namespace Graves
         [System.NonSerialized]
         public List<PartsHand> MyHands = new List<PartsHand>();
 
+        protected int std_partsNum = 45;
+        protected Vector2 std_armSize = new Vector2(0.04f,0.35f);
+        protected Vector2 std_bodySize = new Vector2(0.16f, 0.16f);
+
         /**Movement**/
         [System.NonSerialized]
         public Vector2 MyPosition = Vector2.zero;
@@ -76,13 +80,22 @@ namespace Graves
         //@Private
         private float glavity = 0f;
 
-        // Use this for initialization
-        protected virtual void Start()
+        Dictionary<PartsBase.PartCategory, float> PartsDict = new Dictionary<PartsBase.PartCategory, float>() {
+            { PartsBase.PartCategory.Torso, 60f},
+            { PartsBase.PartCategory.Leg,30f},
+            { PartsBase.PartCategory.Hand,10f}
+        };
+
+        protected virtual void Awake()
         {
             Initialization();
         }
 
-        // Update is called once per frame
+        protected virtual void Start()
+        {
+
+        }
+
         protected virtual void Update()
         {
             //gui_debug_3dLine.main.setWidth(0.01f);
@@ -112,7 +125,7 @@ namespace Graves
                 MovingSpeed = 2f;
             }
 
-            if (LegCount == 0)
+            if (LegCount == 0 || HandCount == 0)
             {
                 if (Core.IsLive)
                 {
@@ -216,22 +229,86 @@ namespace Graves
             //自分の子にあるパーツを全て登録
             SearchParts(transform);
 
+            if (Core && MyParts.Count < 2)
+            {
+                body(false,Core,3,std_armSize,std_bodySize);
+            }
+
             //
             MyPosition = transform.position;
 
             //
-            foreach (PartsBase p in MyParts)
+            EnemyLayer = (int)Mathf.Pow(2,LayerMask.NameToLayer(EnemyLayerName));
+
+        }
+
+        private void body(bool bo,PartsTorso p, int num, Vector2 a, Vector2 b)
+        {
+            Vector2 r = new Vector2(0.8f, 0.9f);
+
+            b = new Vector2(b.x * r.x, b.y * r.y);
+
+            if (MyParts.Count > std_partsNum)
+                return;
+
+            if (num < 1)
             {
-                //親に設定
-                p.MyParent = this;
-
-                //Core
-                PartsCore core = p.gameObject.GetComponent<PartsCore>();
-                if (core)
+                p.ChildPartsPositions.Add(-Vector2.up * p.Size.y / 2f);
+                if (MyHands.Count < 3)
                 {
-                    Core = core;
+                    p.CreateBody(PartsBase.PartCategory.Hand, 0).SetBodySize(a);
                 }
+                else
+                {
+                    p.CreateBody(PartsBase.PartCategory.Leg, 0).SetBodySize(a);
+                }
+            }
+            else
+            {
+                if (!bo)
+                {
+                    for (int i = 0; i < num*3; i++)
+                    {
+                        p.ChildPartsPositions.Add(new Vector2(Random.Range(-p.Size.x, p.Size.x) / 2f, Random.Range(-p.Size.y, p.Size.y) / 2f));
 
+                        PartsTorso pt = p.CreateBody(PartsBase.PartCategory.Torso, i).GetComponent<PartsTorso>() ;
+                        if (pt)
+                        {
+                            pt.SetBodySize(b);
+                            body(ProbabilityCalclator.DetectFromPercent(45f), pt, num, a, b);
+                        }
+                    }
+                }
+                else
+                {
+                    a = new Vector2(a.x * r.x, a.y * r.y);
+
+                    p.ChildPartsPositions.Add(-Vector2.up * p.Size.y / 2f);
+                    PartsTorso pt = p.CreateBody(PartsBase.PartCategory.Torso, 0).GetComponent<PartsTorso>();
+                    if (pt)
+                    {
+                        pt.SetBodySize(a);
+                        body(true, pt, num-1, a, b);
+                    }
+                }
+            }
+        }
+
+        public void RegisterParts(PartsBase p)
+        {
+            MyParts.Add(p);
+
+            //親に設定
+            p.MyParent = this;
+
+            //Core
+            PartsCore core = p.gameObject.GetComponent<PartsCore>();
+            if (core)
+            {
+                Core = core;
+            }
+            else
+            {
                 //脚の設定
                 PartsLeg leg = p.gameObject.GetComponent<PartsLeg>();
                 if (leg)
@@ -240,18 +317,16 @@ namespace Graves
                     LegCount++;
                     MyLegs.Add(leg);
                 }
-
-                //手の設定
-                PartsHand hand = p.gameObject.GetComponent<PartsHand>();
-                if (hand)
+                else
                 {
-                    MyHands.Add(hand);
+                    //手の設定
+                    PartsHand hand = p.gameObject.GetComponent<PartsHand>();
+                    if (hand)
+                    {
+                        MyHands.Add(hand);
+                    }
                 }
             }
-
-            //
-            EnemyLayer = (int)Mathf.Pow(2,LayerMask.NameToLayer(EnemyLayerName));
-
         }
 
         //Partさがす
@@ -264,7 +339,7 @@ namespace Graves
                 if (p)
                 {
                     //Debug.Log("find:" + MyParts.Count + ":" + p.gameObject.name);
-                    MyParts.Add(p);
+                    RegisterParts(p);
                     SearchParts(t);
                 }
             }

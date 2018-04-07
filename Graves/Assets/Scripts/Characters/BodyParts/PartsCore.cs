@@ -4,13 +4,24 @@ using UnityEngine;
 
 namespace Graves
 {
-    public class PartsCore : PartsBase
+    public class PartsCore : PartsTorso
     {
+        protected override void Awake()
+        {
+            base.Awake();
+        }
 
         // Use this for initialization
         protected override void Start()
         {
             base.Start();
+
+            if (MyRigidbody)
+            {
+                MyRigidbody.mass = 2f;
+            }
+
+            HitPoint = MyParent.StandardHitPoint * 2;
         }
 
         // Update is called once per frame
@@ -36,12 +47,18 @@ namespace Graves
 
             MyPartCategory = PartCategory.Core;
 
-            HitPoint = MyParent.StandardHitPoint * 2;
-
             if (MyTargetJoint)
             {
 
             }
         }
+
+#if UNITY_EDITOR
+
+        protected override void OnDrawGizmos()
+        {
+            base.OnDrawGizmos();
+        }
+#endif
     }
 }

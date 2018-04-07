@@ -38,7 +38,7 @@ namespace Graves
         public SpriteRenderer MySpriteRenderer;
 
         /**parts size**/
-        //[System.NonSerialized]
+        [System.NonSerialized]
         public Vector2 Size = Vector2.one;
 
         /**キャラクター管理クラス**/
@@ -56,8 +56,10 @@ namespace Graves
         /**Target Joint**/
         [System.NonSerialized]
         public TargetJoint2D MyTargetJoint = null;
+
         [System.NonSerialized]
         public Vector2 MyTargetPosition = Vector2.zero;
+
         [System.NonSerialized]
         public Vector2 DefaultMyTargetPosition = Vector2.zero;
 
@@ -67,9 +69,11 @@ namespace Graves
         /**Hinge Joint**/
         public struct HingeData
         {
+            public int num;
             public Vector2 defaulAnchorPos;
             public HingeJoint2D hingeJoint;
         }
+
         public List<HingeData> MyHingeJointList = new List<HingeData>();
 
         /**肉体の役割とか**/
@@ -101,9 +105,52 @@ namespace Graves
 
         //@Protected
 
-        protected virtual void Start()
+        protected virtual void Awake()
         {
             Initialization();
+        }
+
+        protected virtual void Start()
+        {
+            if (MyRigidbody)
+            {
+                float r = 0.004f / (Size.x * Size.y);
+                MyRigidbody.mass = r;
+
+                MyRigidbody.angularDrag = 6f;
+                MyRigidbody.drag = 2f;
+            }
+
+            if (MyTargetJoint)
+            {
+                MyTargetPosition = MyTargetJoint.target;
+
+                DefaultMyTargetPosition = MyTargetPosition;
+
+                MyTargetDefaultFrequency = MyTargetJoint.frequency;
+
+                //MyTargetJoint.maxForce = 10000f;
+            }
+
+            //HJoint
+            HingeJoint2D[] hJoints = GetComponents<HingeJoint2D>();
+            foreach (HingeJoint2D hj in hJoints)
+            {
+                HingeData h = new HingeData();
+                h.num = MyHingeJointList.Count;
+                h.hingeJoint = hj;
+                h.defaulAnchorPos = hj.connectedAnchor;
+
+                MyHingeJointList.Add(h);
+            }
+
+            //HitPoint
+            if (MyParent)
+            {
+                HitPoint = MyParent.StandardHitPoint * 2;
+                //Debug.Log(HitPoint);
+            }
+
         }
 
         protected virtual void Update()
@@ -149,40 +196,45 @@ namespace Graves
         /**Attack**/
         public void AddDamage(int damage, Ray ray, float force)
         {
-            PopText text = PopTextController.main.print(damage.ToString(), ray.origin);
-
-            if (MyParent)
+            if (damage > 0)
             {
-                if(MyParent.MyCategory == CharacterBase.CharacterCategory.Player)
-                {
-                    text.text.color = Color.red;
-                    CameraController.main.effect1(0.2f);
-                }
-            }
 
-            HitPoint -= damage;
-            if (HitPoint <= 0)
-            {
-                //親のヒンジを消す
-                if (transform.parent)
-                {
-                    HingeJoint2D[] joints = transform.parent.gameObject.GetComponents<HingeJoint2D>();
+                PopText text = PopTextController.main.print(damage.ToString(), ray.origin);
 
-                    foreach (HingeJoint2D j in joints)
+                if (MyParent)
+                {
+                    if (MyParent.MyCategory == CharacterBase.CharacterCategory.Player)
                     {
-                        if (j.connectedBody == MyRigidbody)
-                        {
-                            Destroy(j);
-                        }
+                        text.text.color = Color.red;
+                        CameraController.main.effect1(0.2f);
                     }
                 }
 
-                transform.parent = null;
-            }
+                HitPoint -= damage;
+                if (HitPoint <= 0)
+                {
+                    //親のヒンジを消す
+                    if (transform.parent)
+                    {
+                        HingeJoint2D[] joints = transform.parent.gameObject.GetComponents<HingeJoint2D>();
 
-            if (MyRigidbody)
-            {
-                MyRigidbody.AddForceAtPosition(ray.direction * (force * damage), ray.origin);
+                        foreach (HingeJoint2D j in joints)
+                        {
+                            if (j.connectedBody == MyRigidbody)
+                            {
+                                Destroy(j);
+                            }
+                        }
+                    }
+
+                    transform.parent = null;
+                }
+
+                if (MyRigidbody)
+                {
+                    MyRigidbody.AddForceAtPosition(ray.direction * (force * damage), ray.origin);
+                }
+
             }
         }
 
@@ -230,16 +282,16 @@ namespace Graves
             MySpriteRenderer = GetComponent<SpriteRenderer>();
 
             //SetSize
-            if (MyBoxCollider)
+            if (MySpriteRenderer)
             {
-                Size = MyBoxCollider.size;
+                Size = MySpriteRenderer.size;
 
-                if (MySpriteRenderer)
+                if (MyBoxCollider)
                 {
-                    MySpriteRenderer.size = Size;
+                    MyBoxCollider.size = Size;
                 }
             }
-            
+
             //もし子にパーツが存在したら親子登録
             foreach ( Transform t in transform )
             {
@@ -252,29 +304,73 @@ namespace Graves
 
             //TJoint
             MyTargetJoint = GetComponent<TargetJoint2D>();
-            if (MyTargetJoint)
+
+            if (MyRigidbody)
             {
-                MyTargetPosition = MyTargetJoint.target;
-
-                DefaultMyTargetPosition = MyTargetPosition;
-
-                MyTargetDefaultFrequency = MyTargetJoint.frequency;
+               // MyRigidbody.mass = 0.05f;
             }
 
-            //HJoint
-            HingeJoint2D[] hJoints = GetComponents<HingeJoint2D>();
-            foreach ( HingeJoint2D hj in hJoints )
-            {
-                HingeData h = new HingeData();
-                h.hingeJoint = hj;
-                h.defaulAnchorPos = hj.connectedAnchor;
-
-                MyHingeJointList.Add(h);
-            }
-
-            //HitPoint
-            HitPoint = MyParent.StandardHitPoint * 2;
             IsLive = true;
+        }
+
+        //setSize
+        public virtual void SetBodySize(Vector2 size)
+        {
+            Size = size;
+
+            if (MySpriteRenderer)
+            {
+                MySpriteRenderer.size = Size;
+            }
+
+            if (MyBoxCollider)
+            {
+                MyBoxCollider.size = Size;
+            }
+        }
+
+        public float GetLength(Transform t)
+        {
+            float length = 0f;
+            Transform t_p = t;
+            Vector2 temp = t_p.position;
+
+            while (t_p.parent)
+            {
+                Rigidbody2D rb = t_p.GetComponent<Rigidbody2D>();
+
+                t_p = t_p.parent;
+
+                HingeJoint2D[] joints = t_p.gameObject.GetComponents<HingeJoint2D>();
+
+                if (rb && joints.Length > 0)
+                {
+                    foreach (HingeJoint2D j in joints)
+                    {
+                        if (j.connectedBody == rb)
+                        {
+                            Vector2 p = t_p.position + t_p.TransformVector(j.anchor);
+
+                            length += (temp - p).magnitude;
+                            temp = p;
+
+                            //gui_debug_3dLine.main.draw(temp, 0.1f);
+                            break;
+                        }
+                    }
+
+                    if(joints.Length != 1)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return length;
         }
 
         #endregion
@@ -285,7 +381,7 @@ namespace Graves
 
         #endregion
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
 
         private void OnDrawGizmos()
         {

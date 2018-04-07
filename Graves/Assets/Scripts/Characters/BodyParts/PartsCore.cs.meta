@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: ad656e2195295104baaf7047b9c28984
-timeCreated: 1520152696
+timeCreated: 1523114213
 licenseType: Free
 MonoImporter:
   externalObjects: {}
@@ -13,7 +13,7 @@ MonoImporter:
   - MyParent: {instanceID: 0}
   - RootParts: {instanceID: 0}
   - MyTargetJoint: {instanceID: 0}
-  executionOrder: 0
+  executionOrder: -60
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

@@ -17,6 +17,13 @@ namespace Graves
 
         private Vector2 defaultCorePosition = Vector2.zero;
 
+        CharacterEnemyTest target = null;
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         // Use this for initialization
         protected override void Start()
         {
@@ -33,21 +40,13 @@ namespace Graves
         {
             base.Update();
 
-            Vector2 p = MyPosition - mousePosition;
-
-            if (p.x > 0f)
-            {
-                ChangeDirection(-1f);
-            }
-            else
-            {
-                ChangeDirection( 1f);
-            }
         }
 
         protected override void Main()
         {
-            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            /*
 
             //Debug
             if (Input.GetKey(KeyCode.A))
@@ -60,6 +59,7 @@ namespace Graves
                 MyDirection = Vector2.right;
                 Move(MyPosition + MyDirection);
             }
+
             if (Core)
             {
                 if (Input.GetKey(KeyCode.S))
@@ -79,18 +79,62 @@ namespace Graves
                 }
             }
 
-            foreach (PartsHand hand in MyHands)
+            */
+
+            if (target)
             {
-                if (Input.GetKey(KeyCode.Mouse0))
+                float l = (target.Core.transform.position - Core.transform.position).magnitude;
+
+                Vector2 mp = MyPosition - target.MyPosition;
+
+                if (mp.x > 0f)
                 {
-                    hand.AttackTime = 0f;
-                    hand.AttackPierce(mousePosition);
+                    ChangeDirection(-1f);
+                }
+                else
+                {
+                    ChangeDirection(1f);
+                }
+
+                if (l > 1.5f)
+                {
+                    if (Core.transform.position.x - target.Core.transform.position.x > 0f)
+                    {
+                        MyDirection = -Vector2.right;
+                        Move(MyPosition - MyDirection);
+                    }
+                    else
+                    {
+                        MyDirection = Vector2.right;
+                        Move(MyPosition + MyDirection);
+                    }
+                }
+
+                foreach (PartsHand hand in MyHands)
+                {
+                    if (hand)
+                    {
+                        Vector2 p = hand.transform.position;
+                        Vector2 t = target.Core.transform.position;
+
+                        if (hand.IsLive && (t - p).magnitude < hand.MaxHandLength * 1.2f)
+                        {
+                            hand.AttackTime = 0f;
+                            hand.AttackPierce(t);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (CharacterEnemyTest.list.Count > 0) {
+                    target = CharacterEnemyTest.list[Random.Range(0, CharacterEnemyTest.list.Count)];
                 }
             }
 
             if (CameraController.main)
             {
-                Vector2 v = MyPosition - mousePosition;
+                //Vector2 v = MyPosition - mousePosition;
 
                 focusPosition = lib.move((Vector3)focusPosition,Core.transform.position + Vector3.up * 0.5f,15f);
 
