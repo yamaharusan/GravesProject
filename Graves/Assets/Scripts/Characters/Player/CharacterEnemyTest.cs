@@ -13,9 +13,13 @@ namespace Graves
 
         protected override void Awake()
         {
-            std_partsNum = Random.Range(35,45);
-            //std_armSize = new Vector2(Random.Range(0.03f,0.06f), Random.Range(0.2f, 0.25f));
-            //std_bodySize = new Vector2(Random.Range(0.05f, 0.1f), Random.Range(0.15f, 0.2f));
+            //std_brunch = 4;
+
+            //std_armSize = new Vector2(0.08f, Random.Range(0.2f,0.3f));
+            //std_bodySize = new Vector2(Random.Range(0.1f, 0.3f), Random.Range(0.1f, 0.2f));
+
+            //std_a = new Vector2(Random.Range(0.9f, 1f), Random.Range(0.9f, 1.1f));
+            //std_b = new Vector2(Random.Range(0.9f, 1.1f), Random.Range(0.9f, 1.1f));
 
             base.Awake();
         }
@@ -47,13 +51,13 @@ namespace Graves
                     IsAttaking = true;
                 }
 
-                AttackRange = hand.MaxHandLength;
+                AttackRange = hand.MaxHandLength * 1.2f;
             }
         }
 
         protected override void Main()
         {
-            if (CharacterPlayer.main)
+            if (CharacterPlayer.main && CharacterPlayer.main.Core.IsLive)
             {
                 CharacterPlayer player = CharacterPlayer.main;
                 Vector2 p = player.MyPosition - MyPosition;
@@ -62,11 +66,14 @@ namespace Graves
 
                 if(AttackRange > dist)
                 {
+                    
                     foreach (PartsHand hand in MyHands)
                     {
-                        if (hand)
-                            hand.AttackPierce(player.Core.transform.position);
+                        PartsBase part = player.MyParts[Random.Range(0, player.MyParts.Count)];
+                        if (part)
+                            hand.AttackPierce(part.transform.position);
                     }
+                    
                 }
                 else if(!IsAttaking)
                 {

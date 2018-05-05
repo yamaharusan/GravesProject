@@ -24,6 +24,7 @@ namespace Graves
         public float MaxHandLength = 0f;
 
         private List<GameObject> attackedParts = new List<GameObject>();
+        private int totalDamage = 0;
 
         private float HandLength = 0f;
 
@@ -43,8 +44,8 @@ namespace Graves
             base.Start();
 
             MaxHandLength = GetLength(transform);
-            HitPoint = MyParent.StandardHitPoint * 4;
-
+ 
+            /*
             if (MyParent)
             {
                 Vector2 v = new Vector2(
@@ -53,6 +54,11 @@ namespace Graves
 
                 MyTargetPosition = MyParent.Core.MyTargetPosition/2f + v;
             }
+            */
+
+            //MyTargetJoint.frequency = 0f;
+
+            //MyTargetJoint.enabled = false;
 
             MyRigidbody.mass = 1f;
         }
@@ -61,20 +67,22 @@ namespace Graves
         protected override void Update()
         {
             base.Update();
-            //Walk
+
             if (MyParent)
             {
                 if (MyTargetJoint)
                 {
                     if (IsAttacking)
+                    {
                         TargetDirection = (TargetPosition - (Vector2)transform.position).normalized;
+                    }
                     else
                         TargetDirection = Vector2.right * MyParent.transform.localScale.x;
 
                     if (MyRigidbody)
                     {
                         float d = Vector2.Dot(TargetDirection, transform.right);
-                        MyRigidbody.AddTorque(-d * 5f - MyRigidbody.angularVelocity * 0.001f);
+                        MyRigidbody.AddTorque( (d * 10f - MyRigidbody.angularVelocity * 0.001f));
                     }
 
                     MyTargetJoint.target =
@@ -112,13 +120,13 @@ namespace Graves
             {
                 //MyTargetJoint.frequency = 0f;
             }
+
         }
 
         protected void JudgeAttack()
         {
             if (EnableSword && !IsParrySword)
             {
-
                 Vector2 u = transform.up;
                 Vector2 p = (Vector2)transform.position + u * (Size.y / 2f);
 
@@ -147,7 +155,7 @@ namespace Graves
                             //gui_debug_3dLine.main.draw(ray.point,0.2f);
 
                             PartsBase part = obj.GetComponent<PartsBase>();
-                            if (part && (part.IsLive || true))
+                            if (part && part.IsLive && part.MyPartCategory != PartCategory.Weapown)
                             {
                                 int damageAttenuation = 1;
                                 if (attackedParts.Count > 0)
@@ -163,57 +171,67 @@ namespace Graves
                                     if (hand)
                                     {
                                         if(hand.EnableSword)
-                                            hand.StartCoroutine(hand.C_Parry(0.2f));
+                                            hand.StartCoroutine(hand.C_Parry(1f));
                                     }
                                 }
                                 */
 
-                                Ray r = new Ray(ray.point, MyRigidbody.velocity);
-                                part.AddDamage(AttackDamage / damageAttenuation, r, 2f);
+                                Ray r = new Ray(
+                                    part.MyParent.Core.transform.position +
+                                    new Vector3(
+                                        Random.Range(-part.MyParent.Core.Size.x, part.MyParent.Core.Size.x), 
+                                        Random.Range(-part.MyParent.Core.Size.y, part.MyParent.Core.Size.y))/2f,                
+                                    MyRigidbody.velocity);
 
-                                if (true || part.HitPoint <= 0)
+                                // Ray r = new Ray(ray.point, MyRigidbody.velocity);
+
+                                int damage = (int)(AttackDamage / damageAttenuation * MyRigidbody.velocity.magnitude);
+
+                                part.AddDamage(damage, r, 1f);
+                                totalDamage += damage;
+                                 
+                                if (true)
                                 {
-                                    if (GetComponent<FixedJoint2D>() == null)
+                                    FixedJoint2D f = part.gameObject.AddComponent<FixedJoint2D>();
+                                    f.connectedBody = MyRigidbody;
+
+                                    FixedJointList.Add(f);
+
+                                    if (part.HitPoint > 0)
                                     {
-                                        FixedJoint2D f = gameObject.AddComponent<FixedJoint2D>();
-                                        f.connectedBody = part.MyRigidbody;
-
-                                        FixedJointList.Add(f);
-
-                                        if (part.HitPoint > 0)
-                                        {
-
-                                            if (part.MyPartCategory != PartCategory.Core)
-                                            {
-                                                Destroy(f, 1f);
-                                            }
-                                            else
-                                            {
-                                                Destroy(f, 0.5f);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Destroy(f, 3f);
-                                        }
+                                        Destroy(f, Random.Range(0.1f,0.3f));
+                                    }
+                                    else
+                                    {
+                                        Destroy(f, 5f);
                                     }
                                 }
+                                
                                 attackedParts.Add(obj);
 
                                 if (MyParent)
                                 {
                                     if (MyParent.MyCategory == CharacterBase.CharacterCategory.Player)
                                     {
-                                        CameraController.main.effect1(0.05f);
+                                        CameraController.main.effect1(0.1f);
+                                        CameraController.main.effect2(0.08f);
                                     }
+                                }
+
+                                if (attackedParts.Count == 1)
+                                {
+                                    GameObject damageEffect = Instantiate(MonsterCreator.main.blood);
+
+                                    damageEffect.transform.position = r.origin;
+                                    damageEffect.transform.rotation = Quaternion.FromToRotation(Vector2.up, -r.direction);
                                 }
                             }
                         }
                     }
                 }
 
-                gui_debug_3dLine.main.setColor(Color.red);
-                gui_debug_3dLine.main.draw(p, p - u * Size.y);
+                //gui_debug_3dLine.main.setColor(Color.red);
+                //gui_debug_3dLine.main.draw(p, p - u * Size.y);
             }
         }
 
@@ -234,42 +252,87 @@ namespace Graves
         public IEnumerator C_Parry(float time)
         {
             IsParrySword = true;
-            if(MyTargetJoint)
-                MyTargetJoint.frequency = 0f;
+            if (MyTargetJoint)
+            {
+                //MyTargetJoint.frequency = 0f;
+                MyTargetJoint.enabled = false;
+            }
 
             yield return new WaitForSeconds(time);
 
             IsParrySword = false;
-            if(MyTargetJoint)
-                MyTargetJoint.frequency = MyTargetDefaultFrequency;
+
+            if (MyTargetJoint)
+            {
+                //MyTargetJoint.frequency = MyTargetDefaultFrequency;
+                MyTargetJoint.enabled = true;
+            }
+            
         }
 
         protected IEnumerator C_AttackPierce(Vector2 target)
         {
             TargetPosition = target;
-            HandLength = -0.1f;
+            HandLength = -0.4f;
 
-            FixedJoint2D[] fs = GetComponents<FixedJoint2D>();
-            foreach (FixedJoint2D j in fs)
+            if (MyTargetJoint)
+            {
+                //MyTargetJoint.frequency = MyTargetDefaultFrequency;
+                MyTargetJoint.enabled = true;
+            }
+
+            foreach (FixedJoint2D j in FixedJointList)
             {
                 Destroy(j);
             }
 
-            attackedParts.Clear();
-
             yield return new WaitForSeconds(AttackTime);
 
-            TargetPosition = TargetDirection * 10f;
-            HandLength = MaxHandLength * 1.05f;
+            TargetPosition = (Vector2)transform.position + TargetDirection * 10f;
+            HandLength = MaxHandLength * 1.1f;
             EnableSword = true;
 
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
+
+            if (attackedParts.Count > 0)
+            {
+
+                Vector2 avrPos = Vector2.zero;
+                foreach (GameObject obj in attackedParts)
+                {
+                    if(obj)
+                       avrPos += (Vector2)obj.transform.position;
+                }
+
+                avrPos /= attackedParts.Count;
+
+                float a = Mathf.Lerp(0.8f,2f, totalDamage / (AttackDamage*6f));
+
+                //Debug.Log(a);
+
+                PopText text = PopTextController.main.print(totalDamage.ToString(), avrPos);
+                text.text.fontSize = (int)(30 * a);
+
+                if (MyParent)
+                {
+                    if (MyParent.MyCategory != CharacterBase.CharacterCategory.Player)
+                    {
+                        text.text.color = Color.red;
+                    }
+                }
+
+                attackedParts.Clear();
+            }
+
+            totalDamage = 0;
 
             EnableSword = false;
 
             yield return new WaitForSeconds(AttackTime);
 
-            HandLength = -0.1f;
+            HandLength = 0f;
+            //MyTargetJoint.frequency = 0f;
+            //MyTargetJoint.enabled = false;
 
             yield return new WaitForSeconds(0.2f);
 

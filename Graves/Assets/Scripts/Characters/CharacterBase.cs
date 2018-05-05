@@ -26,9 +26,8 @@ namespace Graves
         [System.NonSerialized]
         public List<PartsHand> MyHands = new List<PartsHand>();
 
-        protected int std_partsNum = 45;
-        protected Vector2 std_armSize = new Vector2(0.04f,0.35f);
-        protected Vector2 std_bodySize = new Vector2(0.16f, 0.16f);
+        protected int std_partsNum = 25;
+        protected int std_brunch = 4;
 
         /**Movement**/
         [System.NonSerialized]
@@ -58,6 +57,15 @@ namespace Graves
         //[System.NonSerialized]
         public Vector2 WalkCircle = new Vector2(0.2f,0.2f);
 
+        public enum ActionState
+        {
+            Stand,
+            Move,
+            Attack,
+            KnockBack,
+            None = -1
+        }
+
         /**Battle**/
         public enum CharacterCategory
         {
@@ -77,8 +85,19 @@ namespace Graves
 
         public int StandardHitPoint = 10;
 
+        [System.NonSerialized]
+        public int MaxHitPoint = 0;
+
+        //[System.NonSerialized]
+        public int HitPoint = 0;
+
+        [System.NonSerialized]
+        public bool IsLive = true;
+
         //@Private
         private float glavity = 0f;
+
+        private int count = 0;
 
         Dictionary<PartsBase.PartCategory, float> PartsDict = new Dictionary<PartsBase.PartCategory, float>() {
             { PartsBase.PartCategory.Torso, 60f},
@@ -101,19 +120,49 @@ namespace Graves
             //gui_debug_3dLine.main.setWidth(0.01f);
             //gui_debug_3dLine.main.draw(MyPosition, 0.085f);
 
-            //おれはしんだのか
-            CheckDead();
+            if (IsLive)
+            {
+                //Hp計算
+                HitPoint = 0;
+                foreach (PartsBase parts in MyParts)
+                {
+                    //Set HitPoint
+                    HitPoint += parts.HitPoint;
+                }
 
-            //
-            Main();
+                HitPoint -= MaxHitPoint;
 
-            //いどう
-            Movement();
+                //おれはしんだのか
+                CheckDead();
+
+                //
+                Main();
+
+                //いどう
+                Movement();
+            }
+            else
+            {
+                bool parts = false;
+                foreach (PartsBase p in MyParts)
+                {
+                    if (p)
+                    {
+                        parts = true;
+                        break;
+                    }
+                }
+
+                if (parts)
+                {
+                    Destroy(gameObject,5f);
+                }
+            }
         }
 
         protected virtual void Main()
         {
-        
+            
         }
 
         protected virtual void CheckDead()
@@ -125,14 +174,18 @@ namespace Graves
                 MovingSpeed = 2f;
             }
 
-            if (LegCount == 0 || HandCount == 0)
+            if (HitPoint <= 0 || LegCount == 0 || /**|| HandCount == 0 ||**/ transform.position.y < -1f)
             {
+                HitPoint = 0;
+
                 if (Core.IsLive)
                 {
                     Core.HitPoint = 0;
                 }
 
-                Destroy(this);
+                IsLive = false;
+
+                SetColorGradually(Color.gray, 3f);
             }
         }
 
@@ -208,6 +261,7 @@ namespace Graves
 
             //ChangeDirection(MyDirection.x);
 
+
             IsWalk = true;
 
             StartCoroutine(StopWalk());
@@ -222,17 +276,11 @@ namespace Graves
 
         //音
 
-
         //初期化
         protected virtual void Initialization()
         {
             //自分の子にあるパーツを全て登録
             SearchParts(transform);
-
-            if (Core && MyParts.Count < 2)
-            {
-                body(false,Core,3,std_armSize,std_bodySize);
-            }
 
             //
             MyPosition = transform.position;
@@ -240,11 +288,41 @@ namespace Graves
             //
             EnemyLayer = (int)Mathf.Pow(2,LayerMask.NameToLayer(EnemyLayerName));
 
+            //
+            RenewHitPoint();
         }
+
+        protected void RenewHitPoint()
+        {
+            int totalHp = 0;
+
+            foreach (PartsBase parts in MyParts)
+            {
+                //SetLeyers
+                parts.gameObject.layer = gameObject.layer;
+
+                //Set HitPoint
+                totalHp += parts.HitPoint;
+            }
+
+            MaxHitPoint = totalHp / 2;
+            HitPoint = MaxHitPoint;
+        }
+
+        /**
+        protected Vector2 std_armSize = new Vector2(0.04f, 0.25f);
+        protected Vector2 std_bodySize = new Vector2(0.04f, 0.25f);
+
+        protected Vector2 std_a = Vector2.one;
+        protected Vector2 std_b = new Vector2(0.9f, 1.1f);
+
+        private bool ssss = false;
 
         private void body(bool bo,PartsTorso p, int num, Vector2 a, Vector2 b)
         {
-            Vector2 r = new Vector2(0.8f, 0.9f);
+            count++;
+
+            Vector2 r = std_a;
 
             b = new Vector2(b.x * r.x, b.y * r.y);
 
@@ -254,14 +332,17 @@ namespace Graves
             if (num < 1)
             {
                 p.ChildPartsPositions.Add(-Vector2.up * p.Size.y / 2f);
-                if (MyHands.Count < 3)
-                {
-                    p.CreateBody(PartsBase.PartCategory.Hand, 0).SetBodySize(a);
-                }
-                else
+
+                if (ssss)
                 {
                     p.CreateBody(PartsBase.PartCategory.Leg, 0).SetBodySize(a);
                 }
+                else
+                {
+                    p.CreateBody(PartsBase.PartCategory.Hand, 0).SetBodySize(a);
+                }
+
+                ssss = !ssss;
             }
             else
             {
@@ -269,30 +350,45 @@ namespace Graves
                 {
                     for (int i = 0; i < num*3; i++)
                     {
-                        p.ChildPartsPositions.Add(new Vector2(Random.Range(-p.Size.x, p.Size.x) / 2f, Random.Range(-p.Size.y, p.Size.y) / 2f));
+                        Vector2 vv = new Vector2(Mathf.Cos(count * b.x * i) * (p.Size.x / 2) * b.x, Mathf.Sin(count * b.y * i) * p.Size.y / 4 - (p.Size.y / 2) * b.y);
+                        p.ChildPartsPositions.Add(vv);
+
+                        float noise = Mathf.PerlinNoise((i + vv.x) * 100f, (i + vv.y) * 100f);
 
                         PartsTorso pt = p.CreateBody(PartsBase.PartCategory.Torso, i).GetComponent<PartsTorso>() ;
                         if (pt)
                         {
                             pt.SetBodySize(b);
-                            body(ProbabilityCalclator.DetectFromPercent(45f), pt, num, a, b);
+
+                            bool sw = noise > 0.15f/(count*0.1f); 
+
+                            body(sw, pt, std_brunch, a, b);
+
+                            if (!sw)
+                                break;
                         }
                     }
                 }
                 else
                 {
+                    r = std_b;
                     a = new Vector2(a.x * r.x, a.y * r.y);
 
-                    p.ChildPartsPositions.Add(-Vector2.up * p.Size.y / 2f);
-                    PartsTorso pt = p.CreateBody(PartsBase.PartCategory.Torso, 0).GetComponent<PartsTorso>();
-                    if (pt)
+                    for (int i = 0; i < 5; i++)
                     {
-                        pt.SetBodySize(a);
-                        body(true, pt, num-1, a, b);
+                        p.ChildPartsPositions.Add(-Vector2.up * p.Size.y / 2f);
+                        PartsTorso pt = p.CreateBody(PartsBase.PartCategory.Torso, i).GetComponent<PartsTorso>();
+                        if (pt)
+                        {
+                            pt.SetBodySize(a);
+                            body(true, pt, num - 1, a, b);
+                        }
                     }
                 }
             }
         }
+
+        **/
 
         public void RegisterParts(PartsBase p)
         {
@@ -327,6 +423,25 @@ namespace Graves
                     }
                 }
             }
+
+            //HitPoint設定
+            switch (p.MyPartCategory)
+            {
+                case PartsBase.PartCategory.Core:
+                    p.HitPoint = StandardHitPoint * 5;
+
+                    break;
+
+                case PartsBase.PartCategory.Torso:
+                    p.HitPoint = StandardHitPoint * 5;
+
+                    break;
+
+                default:
+                    p.HitPoint = StandardHitPoint;
+
+                    break;
+            }
         }
 
         //Partさがす
@@ -346,6 +461,75 @@ namespace Graves
         }
 
         #region Utility
+
+        public void SetColor(Color color)
+        {
+            foreach (PartsBase p in MyParts)
+            {
+                if (p.MySpriteRenderer)
+                {
+                    p.MySpriteRenderer.color = color;
+                }
+            }
+        }
+
+        public void SetColorTemporary(Color color, float time)
+        {
+            StartCoroutine(C_SetColorTemporary(color,time));
+        }
+
+        private IEnumerator C_SetColorTemporary(Color color, float time)
+        {
+            Color tempColor = Color.white;
+
+            if (Core)
+            {
+                tempColor = Core.MySpriteRenderer.color;
+            }
+
+            SetColor(color);
+
+            yield return new WaitForSeconds(time);
+
+            SetColor(tempColor);
+        }
+
+        public void SetColorGradually(Color color, float time)
+        {
+            StartCoroutine(C_SetColorGradually(color, time));
+        }
+
+        private IEnumerator C_SetColorGradually(Color color, float time)
+        {
+            Color tempColor = Color.white;
+
+            if (Core)
+            {
+                tempColor = Core.MySpriteRenderer.color;
+            }
+
+            Vector3 addColor = new Vector3( color.r - tempColor.r, color.g - tempColor.g, color.b - tempColor.b );
+
+            float t = 0f;
+
+            while (true)
+            {
+                float b = Time.deltaTime / time;
+
+                tempColor += new Color(addColor.x * b, addColor.y * b, addColor.z * b);
+
+                SetColor(tempColor);
+
+                t += Time.deltaTime;
+                if (t >= time)
+                {
+                    SetColor(color);
+                    break;
+                }
+
+                yield return null;
+            }
+        }
 
         protected void ChangeDirection(float d)
         {

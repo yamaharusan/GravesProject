@@ -7,6 +7,7 @@ namespace Graves
     public class PartsTorso : PartsBase
     {
         /**子パーツオブジェクトの接続座標ローカル**/
+        [System.NonSerialized]
         public List<Vector2> ChildPartsPositions = new List<Vector2>();
 
         protected override void Awake()
@@ -27,6 +28,15 @@ namespace Graves
         protected override void Update()
         {
             base.Update();
+        }
+
+        /**初期設定**/
+        protected override void Initialization()
+        {
+            base.Initialization();
+
+            if(MyPartCategory == PartCategory.None)
+                MyPartCategory = PartCategory.Torso;
         }
 
         //肉体生成
@@ -182,11 +192,12 @@ namespace Graves
                     new Vector2(ChildPartsPositions[i].x * v.x, ChildPartsPositions[i].y * v.y);
             }
         }
-
+        
 #if UNITY_EDITOR
-
+        
         protected virtual void OnDrawGizmos()
         {
+            /*
             Gizmos.color = Color.green;
             int count = 0;
 
@@ -199,6 +210,7 @@ namespace Graves
 
                 count++;
             }
+            */
         }
 
 #endif

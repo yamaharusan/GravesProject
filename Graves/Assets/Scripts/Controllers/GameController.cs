@@ -11,10 +11,12 @@ namespace Graves
 {
     public class GameController : MonoBehaviour
     {
+        public Animator UiBlackOut;
+
         // Use this for initialization
         void Start()
         {
-
+            UiBlackOut.SetBool("IsActive", false);
         }
 
         // Update is called once per frame

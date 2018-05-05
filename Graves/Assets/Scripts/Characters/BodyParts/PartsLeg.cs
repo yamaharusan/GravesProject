@@ -17,7 +17,8 @@ namespace Graves
 
         private bool grounded = false;
 
-        private float MyLegLength;
+        [System.NonSerialized]
+        public float MyLegLength;
 
         private float MyMovingSpeed;
 
@@ -37,16 +38,16 @@ namespace Graves
 
             //Debug.Log(MyLegLength);
 
+            /*
             if (MyTargetJoint)
             {
                 MyTargetPosition = new Vector2(Random.Range(-MyLegLength, MyLegLength) / 6f, 0f);
             }
+            */
 
-            MyMovingSpeed = MyParent.MovingSpeed * (MyLegLength / 2f);
+            MyMovingSpeed = MyParent.MovingSpeed;// * (MyLegLength / 2f);
 
-            MyWalkCircle = MyParent.WalkCircle * (MyLegLength / 0.6f);
-
-            HitPoint = MyParent.StandardHitPoint * 2;
+            MyWalkCircle = MyParent.WalkCircle;// * (MyLegLength / 0.6f);
 
             MyRigidbody.mass = 1f;
         }
@@ -81,7 +82,7 @@ namespace Graves
                 {
                     if (MyRigidbody)
                     {
-                        MyRigidbody.AddTorque(-transform.up.x * 5f - MyRigidbody.angularVelocity * 0.001f);
+                        MyRigidbody.AddTorque(transform.up.x * 5f - MyRigidbody.angularVelocity * 0.001f);
                     }
 
                     if (MyParent.IsWalk)
@@ -142,7 +143,7 @@ namespace Graves
 
             if (MyTargetJoint)
             {
-                MyTargetJoint.anchor = Vector2.up * Size.y * 1.01f;
+                MyTargetJoint.anchor = -Vector2.up * Size.y / 2f;
             }
         }
 

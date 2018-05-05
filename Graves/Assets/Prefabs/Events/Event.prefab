@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4564220731325778}
   - component: {fileID: 114638447690594734}
   - component: {fileID: 114169815804349234}
+  - component: {fileID: 114941623534024476}
   m_Layer: 0
   m_Name: Event
   m_TagString: Untagged
@@ -35,7 +36,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1230000886140886}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -56,6 +57,7 @@ MonoBehaviour:
   PartsTorso: {fileID: 1084706450186882, guid: 441b08e0455352c46ae7848bb4c4e3f4, type: 2}
   PartsHand: {fileID: 1998532090327206, guid: 40a86657ed6676d45905302693dd15f6, type: 2}
   PartsLeg: {fileID: 1598777499368162, guid: 7b8bb7dedb508c54381931ad5e72ebb9, type: 2}
+  eye: {fileID: 1540149701680236, guid: d365d5260372eb14d9289793fb03cafc, type: 2}
 --- !u!114 &114638447690594734
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -67,3 +69,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 255f43416fd131546bf526ca16b2fd4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114941623534024476
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1230000886140886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4dc3d944a86ea94eb4a69430518e6e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  obj: {fileID: 1182368710258290, guid: a88f1df00e9b5f74e9d0119039a15a03, type: 2}

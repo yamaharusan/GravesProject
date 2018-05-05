@@ -16,6 +16,11 @@ namespace Graves
         public GameObject PartsTorso;
         public GameObject PartsHand;
         public GameObject PartsLeg;
+        public GameObject eye;
+
+        public GameObject blood;
+        public GameObject continualBlood;
+        public GameObject longBlood;
 
         private void Awake()
         {

@@ -15,7 +15,7 @@ namespace Graves
     public class Main : MonoBehaviour
     {
         // Use this for initialization
-        void Start()
+        void Awake()
         {
             CharacterEnemyTest.list.Clear();
         }
@@ -26,6 +26,28 @@ namespace Graves
             if (Input.GetKey(KeyCode.R))
             {
                 SceneManager.LoadScene("test");
+            }
+        }
+
+        public void Test()
+        {
+            Debug.Log("Test!!!");
+        }
+
+        public static GameObject MouseRaycastSelecter()
+        {
+            RaycastHit2D hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            hit = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
+
+            if (hit)
+            {
+                return hit.transform.gameObject;
+            }
+            else
+            {
+                return null;
             }
         }
     }

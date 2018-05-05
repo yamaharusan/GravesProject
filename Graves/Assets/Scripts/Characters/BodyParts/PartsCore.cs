@@ -18,10 +18,8 @@ namespace Graves
 
             if (MyRigidbody)
             {
-                MyRigidbody.mass = 2f;
+                MyRigidbody.mass = 1.5f;
             }
-
-            HitPoint = MyParent.StandardHitPoint * 2;
         }
 
         // Update is called once per frame
@@ -31,12 +29,15 @@ namespace Graves
 
             if (MyTargetJoint)
             {
-                float time = (Time.time * MyParent.MovingSpeed);
+                float time = (Time.time * MyParent.MovingSpeed * 0.5f);
+
+                //if(MyParent.MyLegs.Count > 0)
+                //MyTargetPosition = Vector2.up * MyParent.MyLegs[0].MyLegLength*1.2f;
 
                 MyTargetJoint.target =
                     MyParent.MyPosition +
-                    MyTargetPosition +
-                    new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x, Mathf.Sin(time) * MyParent.WalkCircle.y) * 0.1f;
+                    MyTargetPosition+
+                    new Vector2(Mathf.Cos(time) * MyParent.WalkCircle.x, 0f) * 0.3f;
             }
         }
 

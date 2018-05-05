@@ -21,6 +21,8 @@ namespace Graves
     {
         #region Members
 
+        protected StdLib lib = new StdLib();
+
         //@Public
         /**rigidbody**/
         [System.NonSerialized]
@@ -49,6 +51,9 @@ namespace Graves
         [System.NonSerialized]
         public PartsBase RootParts;
 
+        [System.NonSerialized]
+        public Vector2 RootJointAnchor;
+
         /**子パーツオブジェクト**/
         [System.NonSerialized]
         public List<PartsBase> ChildParts = new List<PartsBase>();
@@ -70,7 +75,8 @@ namespace Graves
         public struct HingeData
         {
             public int num;
-            public Vector2 defaulAnchorPos;
+            public Vector2 defaultAnchorPos;
+            public Vector2 defaultConnectedAnchorPos;
             public HingeJoint2D hingeJoint;
         }
 
@@ -83,19 +89,22 @@ namespace Graves
             Torso,//トルソー　胴体
             Hand,
             Leg,
+            Weapown,
             None = -1
         }
 
         /**自分の役割　手や足など**/
-        [System.NonSerialized]
         public PartCategory MyPartCategory = PartCategory.None;
 
         /**HitPoint**/
-        [System.NonSerialized]
-        public int HitPoint = 20;
+       // [System.NonSerialized]
+        public int HitPoint = 0;
 
         [System.NonSerialized]
         public bool IsLive = true;
+
+        [System.NonSerialized]
+        public List<ParticleSystem> continualBloodList = new List<ParticleSystem>();
 
         //@Private
 
@@ -131,34 +140,17 @@ namespace Graves
 
                 //MyTargetJoint.maxForce = 10000f;
             }
-
-            //HJoint
-            HingeJoint2D[] hJoints = GetComponents<HingeJoint2D>();
-            foreach (HingeJoint2D hj in hJoints)
-            {
-                HingeData h = new HingeData();
-                h.num = MyHingeJointList.Count;
-                h.hingeJoint = hj;
-                h.defaulAnchorPos = hj.connectedAnchor;
-
-                MyHingeJointList.Add(h);
-            }
-
-            //HitPoint
-            if (MyParent)
-            {
-                HitPoint = MyParent.StandardHitPoint * 2;
-                //Debug.Log(HitPoint);
-            }
-
         }
 
         protected virtual void Update()
         {
             if (MyTargetJoint)
             {
-                gui_debug_3dLine.main.setWidth(0.01f);
-                //gui_debug_3dLine.main.draw(MyTargetJoint.target, 0.05f);
+                if (MyPartCategory == PartCategory.Core || MyPartCategory == PartCategory.Hand || MyPartCategory == PartCategory.Leg) {
+                    gui_debug_3dLine.main.setWidth(0.005f);
+                    gui_debug_3dLine.main.setColor(new Color(1f,1f,1f,0.3f));
+                    gui_debug_3dLine.main.draw(transform.position, MyParent.MyPosition + Vector2.up * 5f);
+                }
             }
 
             if (IsLive)
@@ -182,35 +174,130 @@ namespace Graves
                     {
                         //gameObject.layer = 0;
                         MyRigidbody.sharedMaterial = deadMaterial;
+                        MyRigidbody.velocity = Vector2.zero;
+                        MyRigidbody.mass = 0.1f;
                     }
 
-                    Destroy(gameObject,5f);
+                    Destroy(gameObject,Random.Range(2f,5f));
 
                     //おれはしんだなむ
                     IsLive = false;
                 }
             }
+
+            /*
+            foreach (HingeData data in MyHingeJointList)
+            {
+                Vector2 v = transform.right * data.hingeJoint.anchor.x + transform.up * data.hingeJoint.anchor.y;
+                gui_debug_3dLine.main.draw((Vector2)transform.position + v,0.05f);
+            }
+            */
+        }
+
+        private void OnDestroy()
+        {
+            //Particle分離
+            foreach (ParticleSystem p in continualBloodList)
+            {
+                if (p)
+                {
+                    p.transform.parent = null;
+                    p.loop = false;
+                }
+            }
+
+            /*
+            //親のりすとから自分を消す
+            for (int i = 0; i < MyParent.MyParts.Count; i++)
+            {
+                if (this == MyParent.MyParts[i])
+                {
+                    MyParent.MyParts.Remove(this);
+                }
+            }
+            */
+
+            GameObject damageEffect = Instantiate(MonsterCreator.main.blood);
+            damageEffect.transform.position = transform.position;
         }
 
         //@Public
+
+        
+        public void ConnectParts(PartsBase parts,HingeJoint2D joint)
+        {
+
+        }
+
+        public void ConnectBetweenParts(PartsBase parts, HingeJoint2D joint)
+        {
+
+        }
+
         /**Attack**/
         public void AddDamage(int damage, Ray ray, float force)
         {
-            if (damage > 0)
+            if (damage > 0 && MyPartCategory != PartCategory.Weapown)
             {
-
-                PopText text = PopTextController.main.print(damage.ToString(), ray.origin);
-
                 if (MyParent)
                 {
                     if (MyParent.MyCategory == CharacterBase.CharacterCategory.Player)
                     {
-                        text.text.color = Color.red;
-                        CameraController.main.effect1(0.2f);
+                        CameraController.main.effect1(0.15f);
                     }
                 }
 
                 HitPoint -= damage;
+
+                if (HitPoint <= 0 && ( MyPartCategory == PartCategory.Core || MyPartCategory == PartCategory.Torso) )
+                {
+                    int sDamage = -HitPoint + 1;
+
+                    List<PartsBase> partsList = new List<PartsBase>();
+
+                    foreach (PartsBase p in MyParent.MyParts)
+                    {
+                        if (p.HitPoint > 1 && p.IsLive)
+                        {
+                            partsList.Add(p);
+                        }
+                    }
+
+                    if (partsList.Count > 0)
+                    {
+                        int dd = sDamage;
+                        //余剰ダメージを他のパーツに押し付けてダメージ分散
+                        sDamage = DispersionDamage(sDamage,ref partsList, damage / partsList.Count);
+
+                        //それでも余ってたらむしり取る
+                        if (sDamage > -1)
+                        {
+                            foreach (PartsBase p in partsList)
+                            {
+                                int d = lib.limit(sDamage, 0, p.HitPoint - 1);
+
+                                sDamage -= d;
+                                p.HitPoint -= d;
+
+                                if (sDamage < 1)
+                                    break;
+                            }
+                        }
+
+                        Debug.Log(dd + ":" + sDamage);
+                    }
+
+                    //借金を清算できたら生き残れる
+                    if (sDamage > -1)
+                    {
+                        HitPoint = 1;
+                    }
+                    else
+                    {
+                        HitPoint = 0;
+                    }
+                }
+
                 if (HitPoint <= 0)
                 {
                     //親のヒンジを消す
@@ -223,6 +310,19 @@ namespace Graves
                             if (j.connectedBody == MyRigidbody)
                             {
                                 Destroy(j);
+
+                                //けむり
+                                GameObject damageEffect = Instantiate(MonsterCreator.main.continualBlood);
+
+                                RootParts.continualBloodList.Add(damageEffect.GetComponent<ParticleSystem>());
+
+                                damageEffect.transform.parent = transform.parent;
+
+                                damageEffect.transform.localPosition = j.anchor;
+
+                                Vector2 v = transform.right * j.anchor.x + transform.up * j.anchor.y;
+                                damageEffect.transform.rotation = Quaternion.FromToRotation(Vector2.up, -v.normalized);
+
                             }
                         }
                     }
@@ -230,12 +330,45 @@ namespace Graves
                     transform.parent = null;
                 }
 
-                if (MyRigidbody)
+                /*
+                if (MyRigidbody && HitPoint > 0)
                 {
-                    MyRigidbody.AddForceAtPosition(ray.direction * (force * damage), ray.origin);
+                    MyRigidbody.AddForceAtPosition(ray.direction * force * damage * 0.8f, ray.origin, ForceMode2D.Impulse);
+                }
+                */
+                
+            }
+        }
+
+        private int DispersionDamage(int sDamage,ref List<PartsBase> partsList, int damage)
+        {
+            bool canPay = false;
+
+            int d = sDamage;
+
+            for (int i=0;i<partsList.Count;i++)
+            {
+                if (partsList[i] && partsList[i].HitPoint > damage)
+                {
+                    canPay = true;
+
+                    partsList[i].HitPoint -= damage;
+                    d -= damage;
+
+                    if (d <= 0)
+                    {
+                        break;
+                    }
                 }
 
             }
+
+            if (d > 0 && canPay)
+            {
+                d = DispersionDamage(d,ref partsList, damage);
+            }
+
+            return d;
         }
 
         /**この関数を呼んだ相手を親に登録**/
@@ -254,7 +387,7 @@ namespace Graves
                 if (h.hingeJoint)
                 {
                     //ボディが破綻しそうになっていたらデフォルトの位置に矯正する
-                    Vector2 a = h.hingeJoint.connectedAnchor - h.defaulAnchorPos;
+                    Vector2 a = h.hingeJoint.connectedAnchor - h.defaultConnectedAnchorPos;
                     if (a.x != 0f || a.y != 0f)
                     {
                         //Debug.Log(a);
@@ -282,13 +415,20 @@ namespace Graves
             MySpriteRenderer = GetComponent<SpriteRenderer>();
 
             //SetSize
-            if (MySpriteRenderer)
+            if (MySpriteRenderer && MySpriteRenderer.drawMode != SpriteDrawMode.Simple)
             {
                 Size = MySpriteRenderer.size;
 
                 if (MyBoxCollider)
                 {
                     MyBoxCollider.size = Size;
+                }
+            }
+            else
+            {
+                if (MyBoxCollider)
+                {
+                    Size = MyBoxCollider.size;
                 }
             }
 
@@ -308,6 +448,33 @@ namespace Graves
             if (MyRigidbody)
             {
                // MyRigidbody.mass = 0.05f;
+            }
+
+            //HJoint
+            HingeJoint2D[] hJoints = GetComponents<HingeJoint2D>();
+            foreach (HingeJoint2D hj in hJoints)
+            {
+                //接続先がないやつはオフ
+                if (!hj.connectedBody)
+                {
+                    PartsBase parts = hj.connectedBody.gameObject.GetComponent<PartsBase>();
+
+                    if (parts)
+                    {
+                        parts.RootJointAnchor = hj.connectedAnchor;
+                    }
+
+                    hj.enabled = false;
+                }
+
+                //登録
+                HingeData h = new HingeData();
+                h.num = MyHingeJointList.Count;
+                h.hingeJoint = hj;
+                h.defaultConnectedAnchorPos = hj.connectedAnchor;
+                h.defaultAnchorPos = hj.anchor;
+
+                MyHingeJointList.Add(h);
             }
 
             IsLive = true;

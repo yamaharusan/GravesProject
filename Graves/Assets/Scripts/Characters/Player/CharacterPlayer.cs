@@ -17,7 +17,7 @@ namespace Graves
 
         private Vector2 defaultCorePosition = Vector2.zero;
 
-        CharacterEnemyTest target = null;
+        CharacterBase target = null;
 
         protected override void Awake()
         {
@@ -33,6 +33,8 @@ namespace Graves
 
             mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             main = this;
+
+            ChangeDirection(1f);
         }
 
         // Update is called once per frame
@@ -44,20 +46,36 @@ namespace Graves
 
         protected override void Main()
         {
-            //mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
             /*
+            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
             //Debug
+            Vector2 v = MyPosition - mousePosition;
+            if (v.x > 0f)
+            {
+                ChangeDirection(-1f);
+            }
+            else
+            {
+                ChangeDirection(1f);
+            }
+
             if (Input.GetKey(KeyCode.A))
             {
                 MyDirection = -Vector2.right;
                 Move(MyPosition - MyDirection);
+                //ChangeDirection(-1f);
             }
             else if (Input.GetKey(KeyCode.D))
             {
                 MyDirection = Vector2.right;
                 Move(MyPosition + MyDirection);
+                //ChangeDirection(1f);
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                MyPosition -= (Vector2.right - Vector2.up * 0.2f) * 0.6f;
             }
 
             if (Core)
@@ -65,8 +83,6 @@ namespace Graves
                 if (Input.GetKey(KeyCode.S))
                 {
                     Core.MyTargetPosition = defaultCorePosition / 2f;
-
-
                 }
                 else
                 {
@@ -79,8 +95,31 @@ namespace Graves
                 }
             }
 
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                foreach (PartsHand hand in MyHands)
+                {
+                    if (hand && hand.MyTargetJoint && hand.MyTargetJoint.enabled)
+                    {
+                        hand.AttackTime = 0f;
+                        hand.AttackPierce(mousePosition);
+                    }
+                }
+            }
             */
 
+            
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                MyPosition -= (Vector2.right - Vector2.up * 0.2f) * 0.6f;
+            }
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                MyPosition += (Vector2.right - Vector2.up * 0.2f) * 0.6f;
+            }
+
+            //Auto Battle
             if (target)
             {
                 float l = (target.Core.transform.position - Core.transform.position).magnitude;
@@ -96,7 +135,7 @@ namespace Graves
                     ChangeDirection(1f);
                 }
 
-                if (l > 1.5f)
+                if (l > 1f)
                 {
                     if (Core.transform.position.x - target.Core.transform.position.x > 0f)
                     {
@@ -109,34 +148,62 @@ namespace Graves
                         Move(MyPosition + MyDirection);
                     }
                 }
-
-                foreach (PartsHand hand in MyHands)
+                else
                 {
-                    if (hand)
+                    foreach (PartsHand hand in MyHands)
                     {
-                        Vector2 p = hand.transform.position;
-                        Vector2 t = target.Core.transform.position;
-
-                        if (hand.IsLive && (t - p).magnitude < hand.MaxHandLength * 1.2f)
+                        if (hand && hand.MyTargetJoint && hand.MyTargetJoint.enabled)
                         {
-                            hand.AttackTime = 0f;
-                            hand.AttackPierce(t);
+                            PartsBase p = target.Core;
+                            if (p)
+                            {
+                                Vector2 t = p.transform.position;
+                                hand.AttackTime = 0.15f;
+                                hand.AttackPierce(t);
+                            }
+                        }
+                    }
+                }
+
+                if (!target.IsLive)
+                {
+                    target = null;
+                }
+
+                
+            }
+
+            //SelectEnemyes
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Collider2D[] hits = Physics2D.OverlapCircleAll(Camera.main.ScreenToWorldPoint(Input.mousePosition),0.2f);
+
+                foreach (Collider2D col in hits)
+                {
+                    if (col.gameObject)
+                    {
+                        PartsBase parts = col.gameObject.GetComponent<PartsBase>();
+
+                        if (parts &&
+                            parts.MyParent &&
+                            parts.MyParent.IsLive &&
+                            parts.MyParent.MyCategory == CharacterCategory.Enemy)
+                        {
+                            target = parts.MyParent;
+                            break;
                         }
                     }
                 }
             }
-            else
-            {
-                if (CharacterEnemyTest.list.Count > 0) {
-                    target = CharacterEnemyTest.list[Random.Range(0, CharacterEnemyTest.list.Count)];
-                }
-            }
 
+            gui_debug_window.main.drawLine("HP " + HitPoint + "/" + MaxHitPoint);
+
+            gui_debug_window.main.drawLine("Parts:"+MyParts.Count);
+
+            //Cameraの操作
             if (CameraController.main)
             {
-                //Vector2 v = MyPosition - mousePosition;
-
-                focusPosition = lib.move((Vector3)focusPosition,Core.transform.position + Vector3.up * 0.5f,15f);
+                focusPosition = lib.move((Vector3)focusPosition,(Vector3)MyPosition + Vector3.up*0.7f,15f);
 
                 CameraController.main.setSmooth(6f);
                 Vector3 camPos = (Vector3)focusPosition;
