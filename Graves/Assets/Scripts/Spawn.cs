@@ -18,7 +18,7 @@ public class Spawn : MonoBehaviour {
         {
             GameObject o = Instantiate(obj);
             o.transform.position = transform.position + (Vector3.right * Random.Range(-8f,8f));
-            o.GetComponent<Graves.CharacterBase>().MyPosition = o.transform.position;
+            o.GetComponent<Graves.Character.Base>().MyPosition = o.transform.position;
         }
 	}
 }

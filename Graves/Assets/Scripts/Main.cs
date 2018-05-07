@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 using UnityEngine.SceneManagement;
 
+using Graves.Character;
+
 /**
     キャラクターの基本的なスケール感として10cm以下を想定
 
@@ -33,13 +35,13 @@ namespace Graves
             IsGameOver = false;
             enemyCount = 0;
 
-            CharacterEnemyTest.list.Clear();
+            EnemyTest.list.Clear();
         }
 
         // Update is called once per frame
         void Update()
         {
-            if ((!CharacterPlayer.main.IsLive && !IsGameOver) || enemyCount == enemyCountMax)
+            if ((!Player.main.IsLive && !IsGameOver) || enemyCount == enemyCountMax)
             {
                 IsGameOver = true;
                 StartCoroutine(C_LoadScene());

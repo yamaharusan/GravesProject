@@ -7,9 +7,6 @@ namespace Graves
 {
     public class TitleController : MonoBehaviour
     {
-
-        private static bool FirstLaunch = true;
-
         public Animator UiBlackOut;
 
         void Start()

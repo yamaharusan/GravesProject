@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Graves.Character;
+
 namespace Graves
 {
     public class HitPointPanel : MonoBehaviour
@@ -33,9 +35,9 @@ namespace Graves
         // Update is called once per frame
         void Update()
         {
-            if (CharacterPlayer.main)
+            if (Player.main)
             {
-                CharacterPlayer player = CharacterPlayer.main;
+                Player player = Player.main;
 
                 if (player.MaxHitPoint > 0 && player.MaxStaminaPoint > 0)
                 {

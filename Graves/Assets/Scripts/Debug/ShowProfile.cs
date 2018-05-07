@@ -10,10 +10,10 @@ namespace Graves
         // Update is called once per frame
         void Update()
         {
-            uint monoUsed = Profiler.GetMonoUsedSize();
-            uint monoSize = Profiler.GetMonoHeapSize();
-            uint totalUsed = Profiler.GetTotalAllocatedMemory(); // == Profiler.usedHeapSize
-            uint totalSize = Profiler.GetTotalReservedMemory();
+            long monoUsed = Profiler.GetMonoUsedSizeLong();
+            long monoSize = Profiler.GetMonoHeapSizeLong();
+            long totalUsed = Profiler.GetTotalAllocatedMemoryLong(); // == Profiler.usedHeapSize
+            long totalSize = Profiler.GetTotalReservedMemoryLong();
 
             string txt = string.Format(
                 "mono:{0}/{1} kb({2:f1}%)\n" +
