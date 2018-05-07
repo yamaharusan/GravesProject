@@ -66,6 +66,9 @@ namespace Graves
             None = -1
         }
 
+        [System.NonSerialized]
+        public ActionState MyActionState = ActionState.None;
+
         /**Battle**/
         public enum CharacterCategory
         {
@@ -112,7 +115,8 @@ namespace Graves
 
         protected virtual void Start()
         {
-
+            SetHitPoints();
+            RenewHitPoint();
         }
 
         protected virtual void Update()
@@ -153,9 +157,14 @@ namespace Graves
                     }
                 }
 
-                if (parts)
+                if (!parts)
                 {
                     Destroy(gameObject,5f);
+                }
+
+                if (Core.IsLive)
+                {
+                    Core.HitPoint = 0;
                 }
             }
         }
@@ -163,6 +172,11 @@ namespace Graves
         protected virtual void Main()
         {
             
+        }
+
+        protected virtual void OnDead()
+        {
+
         }
 
         protected virtual void CheckDead()
@@ -176,16 +190,43 @@ namespace Graves
 
             if (HitPoint <= 0 || LegCount == 0 || /**|| HandCount == 0 ||**/ transform.position.y < -1f)
             {
-                HitPoint = 0;
+                OnDead();
 
-                if (Core.IsLive)
-                {
-                    Core.HitPoint = 0;
-                }
+                HitPoint = 0;
 
                 IsLive = false;
 
+                if (Core)
+                    Grave.main.BurialBody(Core);
+
                 SetColorGradually(Color.gray, 3f);
+            }
+        }
+
+        protected void SetHitPoints()
+        {
+            foreach (PartsBase p in MyParts)
+            {
+                //HitPoint設定
+                switch (p.MyPartCategory)
+                {
+                    case PartsBase.PartCategory.Core:
+                        p.MaxHitPoint = StandardHitPoint * 5;
+
+                        break;
+
+                    case PartsBase.PartCategory.Torso:
+                        p.MaxHitPoint = StandardHitPoint * 5;
+
+                        break;
+
+                    default:
+                        p.MaxHitPoint = StandardHitPoint;
+
+                        break;
+                }
+
+                p.HitPoint = p.MaxHitPoint;
             }
         }
 
@@ -280,6 +321,10 @@ namespace Graves
         protected virtual void Initialization()
         {
             //自分の子にあるパーツを全て登録
+            MyParts.Clear();
+            MyLegs.Clear();
+            MyHands.Clear();
+
             SearchParts(transform);
 
             //
@@ -287,9 +332,11 @@ namespace Graves
 
             //
             EnemyLayer = (int)Mathf.Pow(2,LayerMask.NameToLayer(EnemyLayerName));
-
-            //
-            RenewHitPoint();
+            foreach (PartsBase parts in MyParts)
+            {
+                //SetLeyers
+                parts.gameObject.layer = gameObject.layer;
+            }
         }
 
         protected void RenewHitPoint()
@@ -298,9 +345,6 @@ namespace Graves
 
             foreach (PartsBase parts in MyParts)
             {
-                //SetLeyers
-                parts.gameObject.layer = gameObject.layer;
-
                 //Set HitPoint
                 totalHp += parts.HitPoint;
             }
@@ -422,25 +466,6 @@ namespace Graves
                         MyHands.Add(hand);
                     }
                 }
-            }
-
-            //HitPoint設定
-            switch (p.MyPartCategory)
-            {
-                case PartsBase.PartCategory.Core:
-                    p.HitPoint = StandardHitPoint * 5;
-
-                    break;
-
-                case PartsBase.PartCategory.Torso:
-                    p.HitPoint = StandardHitPoint * 5;
-
-                    break;
-
-                default:
-                    p.HitPoint = StandardHitPoint;
-
-                    break;
             }
         }
 

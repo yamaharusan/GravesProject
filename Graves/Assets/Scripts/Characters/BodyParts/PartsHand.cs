@@ -58,8 +58,6 @@ namespace Graves
 
             //MyTargetJoint.frequency = 0f;
 
-            //MyTargetJoint.enabled = false;
-
             MyRigidbody.mass = 1f;
         }
 
@@ -79,10 +77,10 @@ namespace Graves
                     else
                         TargetDirection = Vector2.right * MyParent.transform.localScale.x;
 
-                    if (MyRigidbody)
+                    if (MyRigidbody && MyTargetJoint.enabled)
                     {
                         float d = Vector2.Dot(TargetDirection, transform.right);
-                        MyRigidbody.AddTorque( (d * 10f - MyRigidbody.angularVelocity * 0.001f));
+                        MyRigidbody.AddTorque( (d * 15f - MyRigidbody.angularVelocity * 0.001f));
                     }
 
                     MyTargetJoint.target =
@@ -185,7 +183,7 @@ namespace Graves
 
                                 // Ray r = new Ray(ray.point, MyRigidbody.velocity);
 
-                                int damage = (int)(AttackDamage / damageAttenuation * MyRigidbody.velocity.magnitude);
+                                int damage = (int)(AttackDamage / damageAttenuation * (MyRigidbody.velocity.magnitude * 1.5f));
 
                                 part.AddDamage(damage, r, 1f);
                                 totalDamage += damage;
@@ -197,7 +195,7 @@ namespace Graves
 
                                     FixedJointList.Add(f);
 
-                                    if (part.HitPoint > 0)
+                                    if (part.MyParent.HitPoint > 0 && part.HitPoint > 0)
                                     {
                                         Destroy(f, Random.Range(0.1f,0.3f));
                                     }
@@ -289,7 +287,7 @@ namespace Graves
             yield return new WaitForSeconds(AttackTime);
 
             TargetPosition = (Vector2)transform.position + TargetDirection * 10f;
-            HandLength = MaxHandLength * 1.1f;
+            HandLength = MaxHandLength * 1.05f;
             EnableSword = true;
 
             yield return new WaitForSeconds(0.2f);

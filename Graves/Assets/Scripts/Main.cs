@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using UnityEngine.SceneManagement;
 
@@ -14,24 +15,45 @@ namespace Graves
 {
     public class Main : MonoBehaviour
     {
+        public static bool IsGameOver = false;
+
+        public readonly static int enemyCountMax = 108;
+        public static int enemyCount = 0;
+
+        public Animator UiBlackOut;
+        public GameObject UICanvas;
+
+        public GameObject GameOverText;
+
+        public Text EnemyText;
+
         // Use this for initialization
         void Awake()
         {
+            IsGameOver = false;
+            enemyCount = 0;
+
             CharacterEnemyTest.list.Clear();
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (Input.GetKey(KeyCode.R))
+            if ((!CharacterPlayer.main.IsLive && !IsGameOver) || enemyCount == enemyCountMax)
             {
-                SceneManager.LoadScene("test");
+                IsGameOver = true;
+                StartCoroutine(C_LoadScene());
+            }
+
+            if (EnemyText)
+            {
+                EnemyText.text = enemyCount.ToString("000") + "/" + enemyCountMax;
             }
         }
 
         public void Test()
         {
-            Debug.Log("Test!!!");
+
         }
 
         public static GameObject MouseRaycastSelecter()
@@ -49,6 +71,19 @@ namespace Graves
             {
                 return null;
             }
+        }
+
+        protected IEnumerator C_LoadScene()
+        {
+            UICanvas.SetActive(false);
+            yield return new WaitForSeconds(6f);
+            UiBlackOut.SetBool("IsActive", true);
+
+            yield return new WaitForSeconds(1f);
+            GameOverText.SetActive(true);
+
+            yield return new WaitForSeconds(3f);
+            SceneManager.LoadScene("Title");
         }
     }
 }

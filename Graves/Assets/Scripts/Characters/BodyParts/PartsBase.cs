@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -97,7 +98,9 @@ namespace Graves
         public PartCategory MyPartCategory = PartCategory.None;
 
         /**HitPoint**/
-       // [System.NonSerialized]
+        [System.NonSerialized]
+        public int MaxHitPoint = 0;
+        // [System.NonSerialized]
         public int HitPoint = 0;
 
         [System.NonSerialized]
@@ -178,7 +181,16 @@ namespace Graves
                         MyRigidbody.mass = 0.1f;
                     }
 
-                    Destroy(gameObject,Random.Range(2f,5f));
+                    //親のりすとから自分を消す
+                    for (int i = 0; i < MyParent.MyParts.Count; i++)
+                    {
+                        if (this == MyParent.MyParts[i])
+                        {
+                            MyParent.MyParts.Remove(this);
+                        }
+                    }
+
+                    Destroy(gameObject,UnityEngine.Random.Range(2f,5f));
 
                     //おれはしんだなむ
                     IsLive = false;
@@ -205,17 +217,6 @@ namespace Graves
                     p.loop = false;
                 }
             }
-
-            /*
-            //親のりすとから自分を消す
-            for (int i = 0; i < MyParent.MyParts.Count; i++)
-            {
-                if (this == MyParent.MyParts[i])
-                {
-                    MyParent.MyParts.Remove(this);
-                }
-            }
-            */
 
             GameObject damageEffect = Instantiate(MonsterCreator.main.blood);
             damageEffect.transform.position = transform.position;
@@ -263,9 +264,10 @@ namespace Graves
                         }
                     }
 
+                    int dd = sDamage;
+
                     if (partsList.Count > 0)
                     {
-                        int dd = sDamage;
                         //余剰ダメージを他のパーツに押し付けてダメージ分散
                         sDamage = DispersionDamage(sDamage,ref partsList, damage / partsList.Count);
 
@@ -276,6 +278,11 @@ namespace Graves
                             {
                                 int d = lib.limit(sDamage, 0, p.HitPoint - 1);
 
+                                if (d > sDamage)
+                                {
+                                    d = sDamage;
+                                }
+
                                 sDamage -= d;
                                 p.HitPoint -= d;
 
@@ -283,12 +290,10 @@ namespace Graves
                                     break;
                             }
                         }
-
-                        Debug.Log(dd + ":" + sDamage);
                     }
 
                     //借金を清算できたら生き残れる
-                    if (sDamage > -1)
+                    if (sDamage <= 0)
                     {
                         HitPoint = 1;
                     }
@@ -309,7 +314,8 @@ namespace Graves
                         {
                             if (j.connectedBody == MyRigidbody)
                             {
-                                Destroy(j);
+                                j.enabled = false;
+                                j.connectedBody = null;
 
                                 //けむり
                                 GameObject damageEffect = Instantiate(MonsterCreator.main.continualBlood);
@@ -342,32 +348,34 @@ namespace Graves
 
         private int DispersionDamage(int sDamage,ref List<PartsBase> partsList, int damage)
         {
-            bool canPay = false;
-
             int d = sDamage;
 
-            for (int i=0;i<partsList.Count;i++)
+            if (damage > 0)
             {
-                if (partsList[i] && partsList[i].HitPoint > damage)
+                bool canPay = false;
+
+                for (int i = 0; i < partsList.Count; i++)
                 {
-                    canPay = true;
-
-                    partsList[i].HitPoint -= damage;
-                    d -= damage;
-
-                    if (d <= 0)
+                    if (partsList[i] && partsList[i].HitPoint > damage)
                     {
-                        break;
+                        canPay = true;
+
+                        partsList[i].HitPoint -= damage;
+                        d -= damage;
+
+                        if (d <= 0)
+                        {
+                            break;
+                        }
                     }
+
                 }
 
+                if (d > 0 && canPay)
+                {
+                    d = DispersionDamage(d, ref partsList, damage);
+                }
             }
-
-            if (d > 0 && canPay)
-            {
-                d = DispersionDamage(d,ref partsList, damage);
-            }
-
             return d;
         }
 
@@ -384,7 +392,7 @@ namespace Graves
             //自分の親につながるヒンジの位置を保存するべき
             foreach (HingeData h in MyHingeJointList)
             {
-                if (h.hingeJoint)
+                if (h.hingeJoint && h.hingeJoint.enabled)
                 {
                     //ボディが破綻しそうになっていたらデフォルトの位置に矯正する
                     Vector2 a = h.hingeJoint.connectedAnchor - h.defaultConnectedAnchorPos;
@@ -457,14 +465,15 @@ namespace Graves
                 //接続先がないやつはオフ
                 if (!hj.connectedBody)
                 {
+                    hj.enabled = false;
+                }
+                else
+                {
                     PartsBase parts = hj.connectedBody.gameObject.GetComponent<PartsBase>();
-
                     if (parts)
                     {
                         parts.RootJointAnchor = hj.connectedAnchor;
                     }
-
-                    hj.enabled = false;
                 }
 
                 //登録

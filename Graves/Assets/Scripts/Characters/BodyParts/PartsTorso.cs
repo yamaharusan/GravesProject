@@ -35,8 +35,10 @@ namespace Graves
         {
             base.Initialization();
 
-            if(MyPartCategory == PartCategory.None)
+            if (MyPartCategory == PartCategory.None)
+            {
                 MyPartCategory = PartCategory.Torso;
+            }
         }
 
         //肉体生成

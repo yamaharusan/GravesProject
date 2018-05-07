@@ -11,13 +11,20 @@ namespace Graves
 
         public static CharacterPlayer main;
 
+        [System.NonSerialized]
+        public int MaxStaminaPoint = 100;
+        [System.NonSerialized]
+        public int StaminaPoint = 100;
+
         private Vector2 mousePosition = Vector2.zero;
 
         private Vector2 focusPosition = Vector2.zero;
 
         private Vector2 defaultCorePosition = Vector2.zero;
 
-        CharacterBase target = null;
+        private CharacterBase target = null;
+
+        private bool CheckDodge = false;
 
         protected override void Awake()
         {
@@ -30,11 +37,14 @@ namespace Graves
             base.Start();
 
             MyCategory = CharacterCategory.Player;
+            MyActionState = ActionState.Stand;
 
             mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             main = this;
 
             ChangeDirection(1f);
+
+            StartCoroutine(C_ChargeStamina());
         }
 
         // Update is called once per frame
@@ -46,78 +56,68 @@ namespace Graves
 
         protected override void Main()
         {
-            /*
+
             mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            //Debug
-            Vector2 v = MyPosition - mousePosition;
-            if (v.x > 0f)
+            if (MyActionState == ActionState.Stand)
             {
-                ChangeDirection(-1f);
-            }
-            else
-            {
-                ChangeDirection(1f);
-            }
-
-            if (Input.GetKey(KeyCode.A))
-            {
-                MyDirection = -Vector2.right;
-                Move(MyPosition - MyDirection);
-                //ChangeDirection(-1f);
-            }
-            else if (Input.GetKey(KeyCode.D))
-            {
-                MyDirection = Vector2.right;
-                Move(MyPosition + MyDirection);
-                //ChangeDirection(1f);
-            }
-
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                MyPosition -= (Vector2.right - Vector2.up * 0.2f) * 0.6f;
-            }
-
-            if (Core)
-            {
-                if (Input.GetKey(KeyCode.S))
+                //Debug
+                Vector2 v = MyPosition - mousePosition;
+                if (v.x > 0f)
                 {
-                    Core.MyTargetPosition = defaultCorePosition / 2f;
+                    ChangeDirection(-1f);
                 }
                 else
                 {
-                    if (defaultCorePosition == Vector2.zero)
-                    {
-                        defaultCorePosition = Core.MyTargetPosition;
-                    }
-                    Core.MyTargetPosition = defaultCorePosition;
+                    ChangeDirection(1f);
+                }
 
+                if (Input.GetKey(KeyCode.A))
+                {
+                    MyDirection = -Vector2.right;
+                    Move(MyPosition - MyDirection);
+
+                    StartCoroutine(C_Dodge(KeyCode.A));
+
+                    //ChangeDirection(-1f);
+                }
+                else if (Input.GetKey(KeyCode.D))
+                {
+                    MyDirection = Vector2.right;
+                    Move(MyPosition + MyDirection);
+
+                    StartCoroutine(C_Dodge(KeyCode.D));
+
+                    //ChangeDirection(1f);
                 }
             }
 
-            if (Input.GetKey(KeyCode.Mouse0))
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
                 foreach (PartsHand hand in MyHands)
                 {
-                    if (hand && hand.MyTargetJoint && hand.MyTargetJoint.enabled)
+                    if (!hand.IsAttacking)
                     {
-                        hand.AttackTime = 0f;
-                        hand.AttackPierce(mousePosition);
+                        if (hand && hand.MyTargetJoint && hand.MyTargetJoint.enabled)
+                        {
+                            hand.AttackTime = 0.1f;
+                            hand.AttackPierce(mousePosition);
+
+                            
+                        }
                     }
                 }
             }
-            */
 
-            
-            if (Input.GetKeyDown(KeyCode.A))
+            if (/** (float)MaxHitPoint*0.3f < HitPoint && **/Input.GetKeyDown(KeyCode.E))
             {
-                MyPosition -= (Vector2.right - Vector2.up * 0.2f) * 0.6f;
+                Evolve();
             }
 
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                MyPosition += (Vector2.right - Vector2.up * 0.2f) * 0.6f;
-            }
+            gui_debug_window.main.drawLine(MyActionState.ToString());
+            gui_debug_window.main.drawLine(MyParts.Count.ToString());
+
+            /*
 
             //Auto Battle
             if (target)
@@ -196,19 +196,71 @@ namespace Graves
                 }
             }
 
-            gui_debug_window.main.drawLine("HP " + HitPoint + "/" + MaxHitPoint);
-
-            gui_debug_window.main.drawLine("Parts:"+MyParts.Count);
+            */
 
             //Cameraの操作
             if (CameraController.main)
             {
-                focusPosition = lib.move((Vector3)focusPosition,(Vector3)MyPosition + Vector3.up*0.7f,15f);
+                focusPosition = lib.move((Vector3)focusPosition, (Vector3)MyPosition + Vector3.up * 0.7f, 15f);
 
                 CameraController.main.setSmooth(6f);
                 Vector3 camPos = (Vector3)focusPosition;
                 CameraController.main.look(camPos, camPos - Vector3.forward * 10f);
             }
+        }
+
+        private void Evolve()
+        {
+
+            Vector2 Mypositon = MyPosition;
+
+            HitPoint = 0;
+            foreach (PartsBase parts in MyParts)
+            {
+                HingeJoint2D[] joints = parts.gameObject.GetComponents<HingeJoint2D>();
+
+                foreach (HingeJoint2D j in joints)
+                {
+                    if (!j.connectedBody)
+                    {
+                        foreach (PartsBase p in Grave.main.Parts)
+                        {
+                            bool find = false;
+                            if (parts.MyPartCategory == p.MyPartCategory)
+                            {
+                                find = true;
+                            }
+
+                            if(parts.MyPartCategory == PartsBase.PartCategory.Torso)
+                            {
+                                find = true;
+                            }
+
+                            if (find)
+                            {
+                                p.gameObject.SetActive(true);
+
+                                Vector3 lp = p.transform.localPosition;
+
+                                p.transform.parent = parts.transform;
+
+                                p.transform.localPosition = lp + transform.right * p.RootJointAnchor.x + transform.up * p.RootJointAnchor.y;
+
+                                j.enabled = true;
+                                j.connectedBody = p.GetComponent<Rigidbody2D>();
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Initialization();
+            SetHitPoints();
+            RenewHitPoint();
+
+            MyPosition = Mypositon;
         }
 
         public override void Move(Vector2 target)
@@ -217,5 +269,103 @@ namespace Graves
             StartCoroutine(StopWalk());
         }
 
+        private IEnumerator C_ChargeStamina()
+        {
+            while (true)
+            {
+                if(StaminaPoint < MaxStaminaPoint)
+                {
+                    StaminaPoint += 1;
+                }
+                else
+                {
+                    StaminaPoint = MaxStaminaPoint;
+                }
+
+                if (StaminaPoint < 0)
+                {
+                    StaminaPoint = 0;
+                }
+
+                yield return new WaitForSeconds(0.05f);
+            }
+        }
+
+        private IEnumerator C_DodgeAction(KeyCode key)
+        {
+            int needSp = 35;
+
+            if (needSp <= StaminaPoint)
+            {
+                StaminaPoint -= needSp;
+
+                MyActionState = ActionState.Move;
+
+                float time = 0f;
+
+                while (true)
+                {
+                    float direction = 1f;
+
+                    if (key == KeyCode.A)
+                    {
+                        direction = -1f;
+                    }
+
+                    Vector2 vel = (Vector2.right * direction - Vector2.up * 0.3f) * 15f * Time.deltaTime;
+
+                    MyPosition += vel;
+
+                    time += Time.deltaTime;
+
+                    if (0.08f <= time)
+                    {
+                        break;
+                    }
+
+                    yield return null;
+                }
+
+                yield return new WaitForSeconds(0.3f);
+
+                MyActionState = ActionState.Stand;
+            }
+
+            yield return null;
+        }
+
+        private IEnumerator C_Dodge(KeyCode key)
+        {
+            yield return null;
+
+            if (!CheckDodge)
+            {
+                CheckDodge = true;
+
+                float time = 0f;
+
+                while (true)
+                {
+                    if (Input.GetKeyDown(key) && MyActionState == ActionState.Stand)
+                    {
+                        StartCoroutine(C_DodgeAction(key));
+                        break;
+                    }
+
+                    time += Time.deltaTime;
+
+                    if (0.3f <= time)
+                    {
+                        break;
+                    }
+
+                    yield return null;
+                }
+
+                CheckDodge = false;
+            }
+
+            yield return null;
+        }
     }
 }

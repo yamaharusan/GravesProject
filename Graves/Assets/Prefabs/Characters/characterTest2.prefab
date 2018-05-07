@@ -1034,6 +1034,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7085589cb99e2741a309401c8be72fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MyPartCategory: -1
+  HitPoint: 0
 --- !u!114 &114263414439574580
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1045,7 +1047,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114332141979482198
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1061,6 +1064,7 @@ MonoBehaviour:
   WalkCircle: {x: 0.15, y: 0.1}
   EnemyLayerName: Player
   StandardHitPoint: 25
+  HitPoint: 0
 --- !u!114 &114376286044524104
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1072,7 +1076,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad656e2195295104baaf7047b9c28984, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: -1
+  HitPoint: 0
 --- !u!114 &114415818806124558
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1084,6 +1089,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MyPartCategory: -1
+  HitPoint: 0
 --- !u!114 &114420680129470944
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1095,7 +1102,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114612170932765736
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1107,6 +1115,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MyPartCategory: -1
+  HitPoint: 0
 --- !u!114 &114682145556283798
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1118,7 +1128,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114794802562404494
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1130,7 +1141,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114835342272515584
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1142,7 +1154,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114859529934832164
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1154,7 +1167,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 3
+  HitPoint: 0
 --- !u!114 &114946508945796192
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1166,6 +1180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d1bd5261c03807419eabeae68edc722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MyPartCategory: -1
+  HitPoint: 0
 --- !u!114 &114977524235279800
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1177,7 +1193,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf305eec0755e147b08858a380228b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChildPartsPositions: []
+  MyPartCategory: 2
+  HitPoint: 0
 --- !u!212 &212097537292625464
 SpriteRenderer:
   m_ObjectHideFlags: 1

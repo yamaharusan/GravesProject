@@ -91,5 +91,10 @@ namespace Graves
                 }
             }
         }
+
+        protected override void OnDead()
+        {
+            Graves.Main.enemyCount++;
+        }
     }
 }

@@ -11,8 +11,6 @@ namespace Graves
             base.Awake();
 
             MyPartCategory = PartCategory.Weapown;
-
-            AttackDamage *= 3;
         }
 
         protected override void Start()
